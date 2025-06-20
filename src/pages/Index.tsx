@@ -15,6 +15,9 @@ const Index = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-blue-900">
       <div className="w-full max-w-md bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg border border-blue-100 dark:border-gray-700">
+        <div className="flex justify-center mb-6">
+          <img src="/logo.png" alt="Logo" className="h-16 w-auto" />
+        </div>
         <h1 className="text-3xl font-bold text-blue-900 dark:text-blue-100 mb-6 text-center">Login</h1>
         <form className="space-y-6" onSubmit={handleSubmit}>
           <div>
