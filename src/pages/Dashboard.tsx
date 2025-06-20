@@ -14,7 +14,7 @@ const Dashboard: React.FC = () => {
         <DashboardSidebar />
         <SidebarInset className="flex-1">
           <DashboardHeader />
-          <main className="flex-1 p-8 space-y-8">
+          <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 lg:space-y-8">
             <Routes>
               <Route path="/" element={<DashboardHome />} />
               <Route path="/account" element={<AccountManagement />} />

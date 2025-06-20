@@ -14,27 +14,27 @@ const ActivityHistory: React.FC = () => {
 
   return (
     <Card className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/50 shadow-xl">
-      <CardHeader className="pb-4">
-        <CardTitle className="text-xl font-semibold text-slate-900 dark:text-white flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
-            <span className="text-white text-lg">📊</span>
+      <CardHeader className="pb-3 sm:pb-4">
+        <CardTitle className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white flex items-center gap-3">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+            <span className="text-white text-sm sm:text-lg">📊</span>
           </div>
-          Activity History
+          <span className="truncate">Activity History</span>
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-3">
+        <div className="space-y-2 sm:space-y-3">
           {activities.map((activity) => (
-            <div key={activity.id} className="group flex items-center gap-4 p-4 bg-white/60 dark:bg-slate-700/30 rounded-xl border border-slate-200/50 dark:border-slate-600/50 hover:shadow-md transition-all duration-200">
-              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${activity.color}`}>
-                <span className="text-lg">{activity.icon}</span>
+            <div key={activity.id} className="group flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-white/60 dark:bg-slate-700/30 rounded-xl border border-slate-200/50 dark:border-slate-600/50 hover:shadow-md transition-all duration-200">
+              <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center ${activity.color} flex-shrink-0`}>
+                <span className="text-base sm:text-lg">{activity.icon}</span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-slate-900 dark:text-white text-sm">{activity.action}</p>
+                <p className="font-medium text-slate-900 dark:text-white text-sm truncate">{activity.action}</p>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{activity.time}</p>
               </div>
               {activity.tokens > 0 && (
-                <Badge className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white border-0 text-xs px-2 py-1">
+                <Badge className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white border-0 text-xs px-2 py-1 flex-shrink-0">
                   {activity.tokens} tokens
                 </Badge>
               )}
