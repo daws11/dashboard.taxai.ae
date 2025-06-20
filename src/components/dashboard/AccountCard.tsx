@@ -2,40 +2,41 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { User } from 'lucide-react';
 
 const AccountCard: React.FC = () => {
   return (
-    <Card className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/50 shadow-xl">
-      <CardHeader className="pb-3 sm:pb-4">
-        <CardTitle className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white flex items-center gap-3">
-          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center flex-shrink-0">
-            <span className="text-white font-semibold text-sm sm:text-base">A</span>
+    <Card className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border border-slate-200/60 dark:border-slate-700/60 shadow-lg hover:shadow-xl transition-all duration-300">
+      <CardHeader className="pb-4 sm:pb-6">
+        <CardTitle className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-4">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-slate-100 dark:bg-slate-700 rounded-xl flex items-center justify-center">
+            <User className="h-5 w-5 sm:h-6 sm:w-6 text-slate-600 dark:text-slate-300" />
           </div>
           <span className="truncate">Account Information</span>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4 sm:space-y-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-          <div className="space-y-3 sm:space-y-4">
-            <div className="flex flex-col space-y-1">
-              <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Username</span>
-              <span className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white break-all">john_doe</span>
+      <CardContent className="space-y-6 sm:space-y-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
+          <div className="space-y-4 sm:space-y-6">
+            <div className="bg-slate-50/80 dark:bg-slate-700/50 rounded-xl p-4 sm:p-5">
+              <span className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Username</span>
+              <div className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white mt-2 break-all">john_doe</div>
             </div>
-            <div className="flex flex-col space-y-1">
-              <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Email</span>
-              <span className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white break-all">john@example.com</span>
+            <div className="bg-slate-50/80 dark:bg-slate-700/50 rounded-xl p-4 sm:p-5">
+              <span className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Email</span>
+              <div className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white mt-2 break-all">john@example.com</div>
             </div>
           </div>
-          <div className="space-y-3 sm:space-y-4">
-            <div className="flex flex-col space-y-2">
-              <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Package</span>
-              <Badge className="w-fit bg-gradient-to-r from-blue-500 to-indigo-600 text-white border-0 px-3 py-1">
+          <div className="space-y-4 sm:space-y-6">
+            <div className="bg-slate-50/80 dark:bg-slate-700/50 rounded-xl p-4 sm:p-5">
+              <span className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3 block">Package</span>
+              <Badge className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-0 px-4 py-2 text-sm font-semibold">
                 Premium
               </Badge>
             </div>
-            <div className="flex flex-col space-y-2">
-              <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Status</span>
-              <Badge className="w-fit bg-gradient-to-r from-emerald-500 to-teal-600 text-white border-0 px-3 py-1">
+            <div className="bg-slate-50/80 dark:bg-slate-700/50 rounded-xl p-4 sm:p-5">
+              <span className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3 block">Status</span>
+              <Badge className="bg-slate-700 dark:bg-slate-300 text-white dark:text-slate-900 border-0 px-4 py-2 text-sm font-semibold">
                 Active
               </Badge>
             </div>

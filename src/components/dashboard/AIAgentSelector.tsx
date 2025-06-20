@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Bot, Mic, MessageCircle } from 'lucide-react';
 
 const AIAgentSelector: React.FC = () => {
   const [selectedAgent, setSelectedAgent] = useState<'voice' | 'chat' | null>(null);
@@ -12,66 +13,64 @@ const AIAgentSelector: React.FC = () => {
       name: 'Voice Agent',
       description: 'AI-powered voice assistant for natural conversations',
       status: 'active',
-      icon: '🎤',
-      color: 'from-rose-500 to-pink-600'
+      icon: Mic
     },
     {
       id: 'chat' as const,
       name: 'Chat Agent',
       description: 'Text-based AI assistant for instant messaging',
       status: 'inactive',
-      icon: '💬',
-      color: 'from-cyan-500 to-blue-600'
+      icon: MessageCircle
     }
   ];
 
   return (
-    <Card className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/50 shadow-xl">
+    <Card className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border border-slate-200/60 dark:border-slate-700/60 shadow-lg hover:shadow-xl transition-all duration-300">
       <CardHeader className="pb-4 sm:pb-6">
-        <CardTitle className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white flex items-center gap-3">
-          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-lg flex items-center justify-center flex-shrink-0">
-            <span className="text-white text-base sm:text-lg">🤖</span>
+        <CardTitle className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-4">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-slate-100 dark:bg-slate-700 rounded-xl flex items-center justify-center">
+            <Bot className="h-5 w-5 sm:h-6 sm:w-6 text-slate-600 dark:text-slate-300" />
           </div>
           <span className="truncate">AI Agent Selection</span>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3 sm:space-y-4">
+      <CardContent className="space-y-4 sm:space-y-6">
         {agents.map((agent) => (
           <div 
             key={agent.id}
-            className={`group relative p-4 sm:p-6 border-2 rounded-xl cursor-pointer transition-all duration-300 hover:scale-[1.02] ${
+            className={`group relative p-4 sm:p-6 lg:p-8 border-2 rounded-xl cursor-pointer transition-all duration-300 hover:scale-[1.02] ${
               selectedAgent === agent.id
-                ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-900/20 shadow-lg'
-                : 'border-slate-200 dark:border-slate-600 hover:border-blue-300 dark:hover:border-blue-500 bg-white/50 dark:bg-slate-700/30'
+                ? 'border-slate-900 dark:border-white bg-slate-50/80 dark:bg-slate-700/50 shadow-lg'
+                : 'border-slate-200 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-400 bg-slate-50/40 dark:bg-slate-700/20'
             }`}
             onClick={() => setSelectedAgent(agent.id)}
           >
-            <div className="flex items-start gap-3 sm:gap-4">
-              <div className={`w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br ${agent.color} rounded-xl flex items-center justify-center text-lg sm:text-xl shadow-lg flex-shrink-0`}>
-                {agent.icon}
+            <div className="flex items-start gap-4 sm:gap-6">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-slate-100 dark:bg-slate-700 rounded-xl flex items-center justify-center shadow-sm">
+                <agent.icon className="h-6 w-6 sm:h-7 sm:w-7 text-slate-600 dark:text-slate-300" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between mb-2 sm:mb-3 gap-2">
-                  <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white truncate">{agent.name}</h3>
+                <div className="flex items-center justify-between mb-3 sm:mb-4 gap-3">
+                  <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white truncate">{agent.name}</h3>
                   <Badge 
                     variant={agent.status === 'active' ? 'default' : 'secondary'}
                     className={`${agent.status === 'active' 
-                      ? 'bg-emerald-500 text-white border-0' 
+                      ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-0' 
                       : 'bg-slate-200 text-slate-700 dark:bg-slate-600 dark:text-slate-300 border-0'
-                    } text-xs flex-shrink-0`}
+                    } text-xs font-semibold px-3 py-1 flex-shrink-0`}
                   >
                     {agent.status}
                   </Badge>
                 </div>
-                <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
                   {agent.description}
                 </p>
               </div>
             </div>
             {selectedAgent === agent.id && (
-              <div className="absolute top-2 sm:top-3 right-2 sm:right-3">
-                <div className="w-5 h-5 sm:w-6 sm:h-6 bg-blue-500 rounded-full flex items-center justify-center">
-                  <span className="text-white text-xs">✓</span>
+              <div className="absolute top-3 sm:top-4 right-3 sm:right-4">
+                <div className="w-6 h-6 sm:w-7 sm:h-7 bg-slate-900 dark:bg-white rounded-full flex items-center justify-center">
+                  <span className="text-white dark:text-slate-900 text-xs sm:text-sm font-bold">✓</span>
                 </div>
               </div>
             )}
