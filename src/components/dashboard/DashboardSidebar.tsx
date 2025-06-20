@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { User, Settings, Chart, Home } from 'lucide-react';
+import { User, Settings, BarChart3, Home } from 'lucide-react';
 
 const DashboardSidebar: React.FC = () => {
   const location = useLocation();
@@ -9,7 +8,7 @@ const DashboardSidebar: React.FC = () => {
   const menuItems = [
     { icon: Home, label: 'Dashboard', path: '/dashboard' },
     { icon: User, label: 'Akun', path: '/dashboard/account' },
-    { icon: Chart, label: 'Analitik', path: '/dashboard/analytics' },
+    { icon: BarChart3, label: 'Analitik', path: '/dashboard/analytics' },
     { icon: Settings, label: 'Pengaturan', path: '/dashboard/settings' },
   ];
 
