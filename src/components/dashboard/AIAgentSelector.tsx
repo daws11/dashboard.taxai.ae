@@ -1,5 +1,7 @@
 
 import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 const AIAgentSelector: React.FC = () => {
   const [selectedAgent, setSelectedAgent] = useState<'voice' | 'chat' | null>(null);
@@ -9,45 +11,74 @@ const AIAgentSelector: React.FC = () => {
       id: 'voice' as const,
       name: 'Voice Agent',
       description: 'AI-powered voice assistant for natural conversations',
-      status: 'active'
+      status: 'active',
+      icon: '🎤',
+      color: 'from-rose-500 to-pink-600'
     },
     {
       id: 'chat' as const,
       name: 'Chat Agent',
       description: 'Text-based AI assistant for instant messaging',
-      status: 'inactive'
+      status: 'inactive',
+      icon: '💬',
+      color: 'from-cyan-500 to-blue-600'
     }
   ];
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border border-blue-100 dark:border-gray-700 transition-colors duration-300">
-      <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">AI Agent Selection</h2>
-      <div className="space-y-4">
+    <Card className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/50 shadow-xl">
+      <CardHeader className="pb-6">
+        <CardTitle className="text-xl font-semibold text-slate-900 dark:text-white flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-lg flex items-center justify-center">
+            <span className="text-white text-lg">🤖</span>
+          </div>
+          AI Agent Selection
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
         {agents.map((agent) => (
           <div 
             key={agent.id}
-            className={`p-4 border rounded-lg cursor-pointer transition-colors duration-200 ${
+            className={`group relative p-6 border-2 rounded-xl cursor-pointer transition-all duration-300 hover:scale-[1.02] ${
               selectedAgent === agent.id
-                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900'
-                : 'border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500'
+                ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-900/20 shadow-lg'
+                : 'border-slate-200 dark:border-slate-600 hover:border-blue-300 dark:hover:border-blue-500 bg-white/50 dark:bg-slate-700/30'
             }`}
             onClick={() => setSelectedAgent(agent.id)}
           >
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="font-medium text-gray-900 dark:text-white">{agent.name}</h3>
-              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                agent.status === 'active'
-                  ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
-              }`}>
-                {agent.status}
-              </span>
+            <div className="flex items-start gap-4">
+              <div className={`w-12 h-12 bg-gradient-to-br ${agent.color} rounded-xl flex items-center justify-center text-xl shadow-lg`}>
+                {agent.icon}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white">{agent.name}</h3>
+                  <Badge 
+                    variant={agent.status === 'active' ? 'default' : 'secondary'}
+                    className={agent.status === 'active' 
+                      ? 'bg-emerald-500 text-white border-0' 
+                      : 'bg-slate-200 text-slate-700 dark:bg-slate-600 dark:text-slate-300 border-0'
+                    }
+                  >
+                    {agent.status}
+                  </Badge>
+                </div>
+                <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                  {agent.description}
+                </p>
+              </div>
             </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400">{agent.description}</p>
+            {selectedAgent === agent.id && (
+              <div className="absolute top-3 right-3">
+                <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-xs">✓</span>
+                </div>
+              </div>
+            )}
           </div>
         ))}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 
