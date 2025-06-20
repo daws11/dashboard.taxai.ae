@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,19 +9,28 @@ const AIAgentSelector: React.FC = () => {
   const agents = [
     {
       id: 'voice' as const,
-      name: 'Voice Agent',
-      description: 'AI-powered voice assistant for natural conversations',
+      name: 'Agent Yosr',
+      description: 'Your AI-powered tax consultant, offering instant, chat-based guidance to intelligently optimize your finances for maximum savings and effortless compliance.',
       status: 'active',
       icon: Mic
     },
     {
       id: 'chat' as const,
-      name: 'Chat Agent',
-      description: 'Text-based AI assistant for instant messaging',
+      name: 'Agent Atto',
+      description: 'Your AI-powered tax consultant, offering instant, chat-based guidance to intelligently optimize your finances for maximum savings and effortless compliance.',
       status: 'inactive',
       icon: MessageCircle
     }
   ];
+
+  const handleAgentClick = (agentId: 'voice' | 'chat') => {
+    if (agentId === 'voice') {
+      window.open('https://www.talk.taxai.ae/', '_blank');
+    } else if (agentId === 'chat') {
+      window.open('https://www.ask.taxai.ae/', '_blank');
+    }
+    setSelectedAgent(agentId);
+  };
 
   return (
     <Card className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border border-slate-200/60 dark:border-slate-700/60 shadow-lg hover:shadow-xl transition-all duration-300">
@@ -43,7 +51,7 @@ const AIAgentSelector: React.FC = () => {
                 ? 'border-slate-900 dark:border-white bg-slate-50/80 dark:bg-slate-700/50 shadow-lg'
                 : 'border-slate-200 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-400 bg-slate-50/40 dark:bg-slate-700/20'
             }`}
-            onClick={() => setSelectedAgent(agent.id)}
+            onClick={() => handleAgentClick(agent.id)}
           >
             <div className="flex items-start gap-4 sm:gap-6">
               <div className="w-12 h-12 sm:w-14 sm:h-14 bg-slate-100 dark:bg-slate-700 rounded-xl flex items-center justify-center shadow-sm">
@@ -67,13 +75,6 @@ const AIAgentSelector: React.FC = () => {
                 </p>
               </div>
             </div>
-            {selectedAgent === agent.id && (
-              <div className="absolute top-3 sm:top-4 right-3 sm:right-4">
-                <div className="w-6 h-6 sm:w-7 sm:h-7 bg-slate-900 dark:bg-white rounded-full flex items-center justify-center">
-                  <span className="text-white dark:text-slate-900 text-xs sm:text-sm font-bold">✓</span>
-                </div>
-              </div>
-            )}
           </div>
         ))}
       </CardContent>

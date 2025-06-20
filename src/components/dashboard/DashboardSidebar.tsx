@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { User, Home, LogOut } from 'lucide-react';
@@ -32,13 +31,7 @@ const DashboardSidebar: React.FC = () => {
     <Sidebar>
       <SidebarHeader className="p-6">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-lg">AI</span>
-          </div>
-          <div>
-            <h2 className="font-bold text-gray-900 dark:text-white">AI Agent</h2>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Dashboard</p>
-          </div>
+          <img src="/logo.png" alt="Logo" className="w-auto h-12" />
         </div>
       </SidebarHeader>
       

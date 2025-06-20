@@ -11,11 +11,11 @@ const DashboardHeader: React.FC = () => {
           <SidebarTrigger className="h-8 w-8 sm:h-9 sm:w-9 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors" />
           <div className="min-w-0">
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-slate-900 via-slate-700 to-slate-600 dark:from-white dark:via-slate-200 dark:to-slate-300 bg-clip-text text-transparent truncate">
-              AI Agent Dashboard
+              Tax-AI Dashboard
             </h1>
-            <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 mt-1 hidden sm:block font-medium">
+            {/* <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 mt-1 hidden sm:block font-medium">
               Manage your AI agents and monitor usage
-            </p>
+            </p> */}
           </div>
         </div>
         <div className="flex items-center space-x-3 sm:space-x-4">
