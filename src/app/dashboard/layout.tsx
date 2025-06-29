@@ -11,12 +11,14 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import SidebarLink from "@/components/SidebarLink";
 import { Separator } from "@/components/ui/separator";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import Image from 'next/image';
+import dynamic from 'next/dynamic';
 
 function Logo() {
   return (
     <div className="flex items-center gap-2 mb-8">
-      <img src="/taxai-logo.png" alt="TaxAi Logo" className="h-10 w-auto" />
-      <span className="text-xl font-bold text-blue-700 dark:text-blue-200">TaxAI</span>
+      <Image src="/taxai-logo.png" alt="TaxAi Logo" width={497} height={203} priority />
+      {/* <span className="text-xl font-bold text-blue-700 dark:text-blue-200">TaxAI</span> */}
     </div>
   );
 }
@@ -34,8 +36,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const pathname = typeof window !== "undefined" ? window.location.pathname : "";
   const [open, setOpen] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const router = useRouter();
   const { data: session, status } = useSession();
+  const Loading = dynamic(() => import('@/app/loading'), { ssr: false });
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -54,11 +58,16 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
   const handleLogout = () => {
     setShowLogout(false);
+    setIsLoggingOut(true);
     signOut({ callbackUrl: "/" });
   };
 
   if (status === "loading") {
     return <div className="min-h-screen flex items-center justify-center text-blue-900 dark:text-white">Loading...</div>;
+  }
+
+  if (isLoggingOut) {
+    return <Loading />;
   }
 
   return (

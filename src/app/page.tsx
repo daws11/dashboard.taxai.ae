@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { signIn, useSession } from "next-auth/react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import Image from 'next/image';
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -48,7 +49,7 @@ export default function LoginPage() {
           className="bg-white dark:bg-blue-900 p-8 rounded-lg shadow-lg w-full space-y-6 border border-blue-200 dark:border-blue-800"
         >
           <div className="flex justify-center mb-2">
-            <img src="/taxai-logo.png" alt="TaxAi Logo" className="h-16 w-auto" />
+            <Image src="/taxai-logo.png" alt="TaxAi Logo" width={497} height={203} priority />
           </div>
           {/* <h1 className="text-2xl font-bold text-blue-900 dark:text-white text-center">Login to Your Account</h1> */}
           <div>

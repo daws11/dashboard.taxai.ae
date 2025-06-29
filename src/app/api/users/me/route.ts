@@ -1,5 +1,5 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
 import db from "@/app/api/_utils/db";
 import User from "@/app/api/_models/User";
 import bcrypt from 'bcryptjs';
