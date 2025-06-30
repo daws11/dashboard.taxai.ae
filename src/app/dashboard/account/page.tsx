@@ -1,10 +1,14 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import ProfileForm from "@/components/Account/ProfileForm";
+import SubscriptionInfo from "@/components/Account/SubscriptionInfo";
+import AccountHistory from "@/components/Account/AccountHistory";
+import PlanDialog from "@/components/Account/PlanDialog";
 import { Card } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import { signIn, getSession } from "next-auth/react";
+import { TABS, JOB_TITLES, LANGUAGES, plans } from "./accountConstants";
+import { normalizeLanguage } from "./accountUtils";
 
 const mockUser = {
   name: "Budi Santoso",
@@ -30,29 +34,6 @@ const mockUser = {
   updatedAt: "2024-05-10",
 };
 
-const TABS = ["Profile", "Subscription", "Account History"];
-
-const JOB_TITLES = [
-  { value: "tax agent", label: "Tax Agent" },
-  { value: "business owner", label: "Business Owner" },
-  { value: "finance", label: "Finance" },
-];
-
-const LANGUAGES = [
-  { value: "english", label: "English" },
-  { value: "arabic", label: "العربية" },
-  { value: "chinese", label: "中文" },
-];
-
-function normalizeLanguage(val: string) {
-  if (!val) return "";
-  const lower = val.toLowerCase();
-  if (["english", "en", "eng", "english"].includes(lower) || val === "English") return "english";
-  if (["arabic", "ar", "arab", "العربية"].includes(lower) || val === "العربية") return "arabic";
-  if (["chinese", "zh", "中文"].includes(lower) || val === "中文") return "chinese";
-  return lower;
-}
-
 export default function AccountManagement() {
   const [tab, setTab] = useState("Profile");
   const [email, setEmail] = useState(mockUser.email);
@@ -67,6 +48,8 @@ export default function AccountManagement() {
   const [trialUsed, setTrialUsed] = useState(mockUser.trialUsed);
   const [createdAt, setCreatedAt] = useState(mockUser.createdAt);
   const [updatedAt, setUpdatedAt] = useState(mockUser.updatedAt);
+  const [planDialogOpen, setPlanDialogOpen] = useState(false);
+  const [openPlan, setOpenPlan] = useState("");
 
   useEffect(() => {
     async function fetchUser() {
@@ -133,6 +116,12 @@ export default function AccountManagement() {
     setLoading(false);
   }
 
+  function handlePlanChange(planKey: string) {
+    // TODO: implementasi perubahan plan
+    // setSubscription(...)
+    setPlanDialogOpen(false);
+  }
+
   return (
     <main className="min-h-screen bg-blue-50 dark:bg-blue-950 py-8 px-4 md:px-12">
       <div className="max-w-3xl mx-auto space-y-8">
@@ -156,113 +145,46 @@ export default function AccountManagement() {
               <h2 className="text-xl font-semibold text-blue-900 dark:text-white flex items-center gap-2 mb-4">
                 <span role="img" aria-label="profile">👤</span> Profile Information
               </h2>
-              <form className="space-y-6" onSubmit={handleUpdate}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="name" className="block text-blue-900 dark:text-blue-200 mb-1">Name</label>
-                    <Input
-                      id="name"
-                      type="text"
-                      value={name}
-                      onChange={e => setName(e.target.value)}
-                      className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-700 text-blue-900 dark:text-white"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="email" className="block text-blue-900 dark:text-blue-200 mb-1">Email</label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={email}
-                      onChange={e => setEmail(e.target.value)}
-                      className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-700 text-blue-900 dark:text-white"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="password" className="block text-blue-900 dark:text-blue-200 mb-1">New Password</label>
-                    <Input
-                      id="password"
-                      type="password"
-                      value={password}
-                      onChange={e => setPassword(e.target.value)}
-                      placeholder="Leave blank to keep current password"
-                      className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-700 text-blue-900 dark:text-white"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="jobTitle" className="block text-blue-900 dark:text-blue-200 mb-1">Job Title</label>
-                    <select
-                      id="jobTitle"
-                      value={jobTitle || JOB_TITLES[0].value}
-                      onChange={e => setJobTitle(e.target.value)}
-                      className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-700 text-blue-900 dark:text-white rounded-md h-9 w-full px-3"
-                    >
-                      {!jobTitle && <option value="">Select job title</option>}
-                      {JOB_TITLES.map(j => (
-                        <option key={j.value} value={j.value}>{j.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label htmlFor="language" className="block text-blue-900 dark:text-blue-200 mb-1">Language</label>
-                    <select
-                      id="language"
-                      value={language || LANGUAGES[0].value}
-                      onChange={e => setLanguage(e.target.value)}
-                      className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-700 text-blue-900 dark:text-white rounded-md h-9 w-full px-3"
-                    >
-                      {!language && <option value="">Select language</option>}
-                      {LANGUAGES.map(l => (
-                        <option key={l.value} value={l.value}>{l.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-                <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-800 dark:hover:bg-blue-900 w-full" disabled={loading}>
-                  {loading ? "Updating..." : "Update Profile"}
-                </Button>
-                {message && <div className="text-center text-sm mt-2 text-blue-700 dark:text-blue-200">{message}</div>}
-              </form>
-              <Button variant="destructive" className="w-full mt-4" onClick={handleDelete} disabled={loading}>
-                {loading ? "Processing..." : "Delete Account"}
-              </Button>
+              <ProfileForm
+                name={name}
+                setName={setName}
+                email={email}
+                setEmail={setEmail}
+                password={password}
+                setPassword={setPassword}
+                jobTitle={jobTitle}
+                setJobTitle={setJobTitle}
+                language={language}
+                setLanguage={setLanguage}
+                jobTitles={JOB_TITLES}
+                languages={LANGUAGES}
+                loading={loading}
+                message={message}
+                onSubmit={handleUpdate}
+                onDelete={handleDelete}
+              />
             </Card>
           )}
           {tab === "Subscription" && (
-            <Card className="p-8 shadow-xl space-y-6">
-              <h2 className="text-xl font-semibold text-blue-900 dark:text-white flex items-center gap-2 mb-4">
-                <span role="img" aria-label="subscription">💳</span> Subscription & Payment
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <div className="text-sm">Type: <span className="font-medium">{subscription?.type ? subscription.type.charAt(0).toUpperCase() + subscription.type.slice(1) : '-'}</span></div>
-                  <div className="text-sm">Status: <span className={`font-medium ${subscription?.status === 'active' ? 'text-green-600' : subscription?.status === 'expired' ? 'text-red-600' : 'text-yellow-600'}`}>{subscription?.status ? subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1) : '-'}</span></div>
-                  <div className="text-sm">Message Limit: {subscription?.messageLimit ?? '-'}</div>
-                  <div className="text-sm">Remaining Messages: {subscription?.remainingMessages ?? '-'}</div>
-                  <div className="text-sm">Start Date: {subscription?.startDate ? new Date(subscription.startDate).toISOString().slice(0, 10) : '-'}</div>
-                  <div className="text-sm">End Date: {subscription?.endDate ? new Date(subscription.endDate).toISOString().slice(0, 10) : '-'}</div>
-                  <div className="text-sm">Trial Used: <span className={trialUsed ? 'text-red-600' : 'text-green-600'}>{trialUsed ? 'Yes' : 'No'}</span></div>
-                </div>
-                <div className="bg-blue-100 dark:bg-blue-900 rounded p-4 space-y-2">
-                  <div className="font-semibold mb-1 flex items-center gap-2"><span role="img" aria-label="payment">💰</span> Payment Info</div>
-                  <div className="text-sm">Amount: <span className="font-medium">{subscription?.payment?.amount ? `$${subscription.payment.amount}` : '-'}</span></div>
-                  <div className="text-sm">Method: {subscription?.payment?.method ?? '-'}</div>
-                  <div className="text-sm">Last Payment: {subscription?.payment?.lastPaymentDate ? new Date(subscription.payment.lastPaymentDate).toISOString().slice(0, 10) : '-'}</div>
-                  <div className="text-sm">Next Payment: {subscription?.payment?.nextPaymentDate ? new Date(subscription.payment.nextPaymentDate).toISOString().slice(0, 10) : '-'}</div>
-                </div>
-              </div>
-            </Card>
+            <SubscriptionInfo
+              subscription={subscription}
+              trialUsed={trialUsed}
+              createdAt={createdAt}
+              PlanDialog={
+                <PlanDialog
+                  planDialogOpen={planDialogOpen}
+                  setPlanDialogOpen={setPlanDialogOpen}
+                  openPlan={openPlan}
+                  setOpenPlan={setOpenPlan}
+                  plans={plans}
+                  subscription={subscription}
+                  onPlanChange={handlePlanChange}
+                />
+              }
+            />
           )}
           {tab === "Account History" && (
-            <Card className="p-8 shadow-xl space-y-6">
-              <h2 className="text-xl font-semibold text-blue-900 dark:text-white flex items-center gap-2 mb-4">
-                <span role="img" aria-label="history">🕒</span> Account History
-              </h2>
-              <div className="flex flex-col gap-2">
-                <div className="text-sm">Created At: <span className="font-medium">{createdAt}</span></div>
-                <div className="text-sm">Updated At: <span className="font-medium">{updatedAt}</span></div>
-              </div>
-            </Card>
+            <AccountHistory createdAt={createdAt} updatedAt={updatedAt} />
           )}
         </div>
       </div>
