@@ -63,6 +63,10 @@ export default function AccountManagement() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [subscription, setSubscription] = useState(mockUser.subscription);
+  const [trialUsed, setTrialUsed] = useState(mockUser.trialUsed);
+  const [createdAt, setCreatedAt] = useState(mockUser.createdAt);
+  const [updatedAt, setUpdatedAt] = useState(mockUser.updatedAt);
 
   useEffect(() => {
     async function fetchUser() {
@@ -73,6 +77,10 @@ export default function AccountManagement() {
         setEmail(user.email || "");
         setJobTitle(user.jobTitle || "");
         setLanguage(normalizeLanguage(user.language || ""));
+        setSubscription(user.subscription || {});
+        setTrialUsed(user.trialUsed || false);
+        setCreatedAt(user.createdAt ? new Date(user.createdAt).toISOString().slice(0, 10) : "");
+        setUpdatedAt(user.updatedAt ? new Date(user.updatedAt).toISOString().slice(0, 10) : "");
       }
     }
     fetchUser();
@@ -227,20 +235,20 @@ export default function AccountManagement() {
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <div className="text-sm">Type: <span className="font-medium">{mockUser.subscription.type.charAt(0).toUpperCase() + mockUser.subscription.type.slice(1)}</span></div>
-                  <div className="text-sm">Status: <span className={`font-medium ${mockUser.subscription.status === 'active' ? 'text-green-600' : mockUser.subscription.status === 'expired' ? 'text-red-600' : 'text-yellow-600'}`}>{mockUser.subscription.status.charAt(0).toUpperCase() + mockUser.subscription.status.slice(1)}</span></div>
-                  <div className="text-sm">Message Limit: {mockUser.subscription.messageLimit}</div>
-                  <div className="text-sm">Remaining Messages: {mockUser.subscription.remainingMessages}</div>
-                  <div className="text-sm">Start Date: {mockUser.subscription.startDate}</div>
-                  <div className="text-sm">End Date: {mockUser.subscription.endDate}</div>
-                  <div className="text-sm">Trial Used: <span className={mockUser.trialUsed ? 'text-red-600' : 'text-green-600'}>{mockUser.trialUsed ? 'Yes' : 'No'}</span></div>
+                  <div className="text-sm">Type: <span className="font-medium">{subscription?.type ? subscription.type.charAt(0).toUpperCase() + subscription.type.slice(1) : '-'}</span></div>
+                  <div className="text-sm">Status: <span className={`font-medium ${subscription?.status === 'active' ? 'text-green-600' : subscription?.status === 'expired' ? 'text-red-600' : 'text-yellow-600'}`}>{subscription?.status ? subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1) : '-'}</span></div>
+                  <div className="text-sm">Message Limit: {subscription?.messageLimit ?? '-'}</div>
+                  <div className="text-sm">Remaining Messages: {subscription?.remainingMessages ?? '-'}</div>
+                  <div className="text-sm">Start Date: {subscription?.startDate ? new Date(subscription.startDate).toISOString().slice(0, 10) : '-'}</div>
+                  <div className="text-sm">End Date: {subscription?.endDate ? new Date(subscription.endDate).toISOString().slice(0, 10) : '-'}</div>
+                  <div className="text-sm">Trial Used: <span className={trialUsed ? 'text-red-600' : 'text-green-600'}>{trialUsed ? 'Yes' : 'No'}</span></div>
                 </div>
                 <div className="bg-blue-100 dark:bg-blue-900 rounded p-4 space-y-2">
                   <div className="font-semibold mb-1 flex items-center gap-2"><span role="img" aria-label="payment">💰</span> Payment Info</div>
-                  <div className="text-sm">Amount: <span className="font-medium">${mockUser.subscription.payment.amount}</span></div>
-                  <div className="text-sm">Method: {mockUser.subscription.payment.method}</div>
-                  <div className="text-sm">Last Payment: {mockUser.subscription.payment.lastPaymentDate}</div>
-                  <div className="text-sm">Next Payment: {mockUser.subscription.payment.nextPaymentDate}</div>
+                  <div className="text-sm">Amount: <span className="font-medium">{subscription?.payment?.amount ? `$${subscription.payment.amount}` : '-'}</span></div>
+                  <div className="text-sm">Method: {subscription?.payment?.method ?? '-'}</div>
+                  <div className="text-sm">Last Payment: {subscription?.payment?.lastPaymentDate ? new Date(subscription.payment.lastPaymentDate).toISOString().slice(0, 10) : '-'}</div>
+                  <div className="text-sm">Next Payment: {subscription?.payment?.nextPaymentDate ? new Date(subscription.payment.nextPaymentDate).toISOString().slice(0, 10) : '-'}</div>
                 </div>
               </div>
             </Card>
@@ -251,8 +259,8 @@ export default function AccountManagement() {
                 <span role="img" aria-label="history">🕒</span> Account History
               </h2>
               <div className="flex flex-col gap-2">
-                <div className="text-sm">Created At: <span className="font-medium">{mockUser.createdAt}</span></div>
-                <div className="text-sm">Updated At: <span className="font-medium">{mockUser.updatedAt}</span></div>
+                <div className="text-sm">Created At: <span className="font-medium">{createdAt}</span></div>
+                <div className="text-sm">Updated At: <span className="font-medium">{updatedAt}</span></div>
               </div>
             </Card>
           )}
