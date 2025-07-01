@@ -39,50 +39,52 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-blue-50 dark:bg-blue-950">
-      <div className="relative w-full max-w-md">
-        <div className="absolute top-4 right-4 z-10">
+    <main className="min-h-screen flex items-center justify-center bg-blue-50 dark:bg-blue-950 px-2 sm:px-4">
+      <div className="relative w-full max-w-md sm:max-w-md md:max-w-lg mx-auto">
+        <div className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10">
           <ThemeToggle />
         </div>
         <form
           onSubmit={handleLogin}
-          className="bg-white dark:bg-blue-900 p-8 rounded-lg shadow-lg w-full space-y-6 border border-blue-200 dark:border-blue-800"
+          className="bg-white dark:bg-blue-900 p-4 sm:p-8 rounded-lg shadow-lg w-full space-y-6 border border-blue-200 dark:border-blue-800"
         >
           <div className="flex justify-center mb-2">
-            <Image src="/taxai-logo.png" alt="TaxAi Logo" width={497} height={203} priority />
+            <div className="w-32 sm:w-48 md:w-60">
+              <Image src="/taxai-logo.png" alt="TaxAi Logo" width={497} height={203} priority className="w-full h-auto object-contain" />
+            </div>
           </div>
           {/* <h1 className="text-2xl font-bold text-blue-900 dark:text-white text-center">Login to Your Account</h1> */}
           <div>
-            <label htmlFor="email" className="block text-blue-900 dark:text-blue-200 mb-1">Email</label>
+            <label htmlFor="email" className="block text-blue-900 dark:text-blue-200 mb-1 text-sm sm:text-base">Email</label>
             <Input
               id="email"
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
               placeholder="Enter your email"
-              className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-700 text-blue-900 dark:text-white"
+              className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-700 text-blue-900 dark:text-white text-sm sm:text-base"
               required
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-blue-900 dark:text-blue-200 mb-1">Password</label>
+            <label htmlFor="password" className="block text-blue-900 dark:text-blue-200 mb-1 text-sm sm:text-base">Password</label>
             <Input
               id="password"
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
               placeholder="Enter your password"
-              className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-700 text-blue-900 dark:text-white"
+              className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-700 text-blue-900 dark:text-white text-sm sm:text-base"
               required
             />
           </div>
           <div className="flex justify-between items-center mt-2">
-            <a href="#" className="text-blue-600 hover:underline text-sm">Forgot password?</a>
+            <a href="#" className="text-blue-600 hover:underline text-xs sm:text-sm">Forgot password?</a>
           </div>
-          {error && <div className="text-red-600 text-sm text-center">{error}</div>}
+          {error && <div className="text-red-600 text-xs sm:text-sm text-center">{error}</div>}
           <Button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-800 dark:hover:bg-blue-900 flex items-center justify-center"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-800 dark:hover:bg-blue-900 flex items-center justify-center text-sm sm:text-base h-10 sm:h-12"
             disabled={loading || status === "loading"}
           >
             {loading || status === "loading" ? (
@@ -97,7 +99,7 @@ export default function LoginPage() {
               "Login"
             )}
           </Button>
-          <div className="mt-8 text-center text-sm text-blue-900 dark:text-blue-200">
+          <div className="mt-6 sm:mt-8 text-center text-xs sm:text-sm text-blue-900 dark:text-blue-200">
             Login using an account you have previously created.<br />
             <span>
               Don&apos;t have an account?{' '}

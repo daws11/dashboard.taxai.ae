@@ -3,13 +3,28 @@ import * as Accordion from "@radix-ui/react-accordion";
 import { motion } from "framer-motion";
 import React from "react";
 
+// Tambahkan tipe Plan dan Subscription
+type Plan = {
+  key: string;
+  name: string;
+  price: string;
+  priceAED?: string;
+  description: string;
+  features: string[];
+  contact?: boolean;
+};
+
+type Subscription = {
+  type?: string;
+} & Record<string, unknown>;
+
 interface PlanDialogProps {
   planDialogOpen: boolean;
   setPlanDialogOpen: (v: boolean) => void;
   openPlan: string;
   setOpenPlan: (v: string) => void;
-  plans: any[];
-  subscription: any;
+  plans: Plan[];
+  subscription: Subscription;
   onPlanChange: (planKey: string) => void;
 }
 

@@ -116,7 +116,7 @@ export default function AccountManagement() {
     setLoading(false);
   }
 
-  function handlePlanChange(planKey: string) {
+  function handlePlanChange() {
     // TODO: implementasi perubahan plan
     // setSubscription(...)
     setPlanDialogOpen(false);

@@ -3,6 +3,7 @@
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 
 interface AgentOption {
   key: 'voice' | 'chat';
@@ -28,6 +29,20 @@ const AGENTS: AgentOption[] = [
 
 export function AgentSelector() {
   const [selected, setSelected] = useState<'voice' | 'chat'>('chat');
+  const { data: session } = useSession();
+
+  const handleSelect = (agentKey: 'voice' | 'chat') => {
+    setSelected(agentKey);
+    let token: string | undefined = undefined;
+    if (session && typeof session === 'object' && 'accessToken' in session && typeof session.accessToken === 'string') {
+      token = session.accessToken;
+    }
+    if (agentKey === 'chat') {
+      window.open(`https://ask.taxai.ae/${token ? `?token=${encodeURIComponent(token)}` : ''}`, '_blank');
+    } else if (agentKey === 'voice') {
+      window.open(`https://talk.taxai.ae/${token ? `?token=${encodeURIComponent(token)}` : ''}`, '_blank');
+    }
+  };
 
   return (
     <div className="flex flex-col md:flex-row gap-4">
@@ -44,7 +59,7 @@ export function AgentSelector() {
           <Button
             variant={selected === agent.key ? 'default' : 'outline'}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-800 dark:hover:bg-blue-900"
-            onClick={() => setSelected(agent.key)}
+            onClick={() => handleSelect(agent.key)}
           >
             Select
           </Button>
