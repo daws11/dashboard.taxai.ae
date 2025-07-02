@@ -7,7 +7,8 @@ import bcrypt from "bcryptjs";
 import type { Session } from "next-auth";
 import type { JWT } from "next-auth/jwt";
 import type { SessionStrategy } from "next-auth";
-// @ts-expect-error: If type error, ensure @types/jsonwebtoken is installed
+import type { User as NextAuthUser } from "next-auth";
+import type { AdapterUser } from "next-auth/adapters";
 import jwt from "jsonwebtoken";
 
 export const authOptions = {
@@ -50,8 +51,19 @@ export const authOptions = {
       }
       return session;
     },
-    async jwt({ token, user }: { token: JWT; user?: Record<string, unknown> }) {
-      if (user && typeof user === 'object' && user !== null && 'email' in user) {
+    async jwt({
+      token,
+      user,
+    }: {
+      token: JWT;
+      user?: NextAuthUser | AdapterUser;
+      account?: unknown;
+      profile?: unknown;
+      trigger?: "signIn" | "signUp" | "update";
+      isNewUser?: boolean;
+      session?: unknown;
+    }) {
+      if (user && typeof user === 'object' && 'email' in user) {
         token.accessToken = token.sub;
         token.email = user.email as string;
         const payload = {
