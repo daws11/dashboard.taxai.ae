@@ -34,13 +34,13 @@ export function AgentSelector() {
   const handleSelect = (agentKey: 'voice' | 'chat') => {
     setSelected(agentKey);
     let token: string | undefined = undefined;
-    if (session && typeof session === 'object' && 'accessToken' in session && typeof session.accessToken === 'string') {
-      token = session.accessToken;
+    if (session && typeof session === 'object' && 'ssoJwt' in session && typeof (session as Record<string, unknown>).ssoJwt === 'string') {
+      token = (session as Record<string, unknown>).ssoJwt as string;
     }
     if (agentKey === 'chat') {
-      window.open(`https://ask.taxai.ae/${token ? `?token=${encodeURIComponent(token)}` : ''}`, '_blank');
+      window.location.href = `https://ask.taxai.ae/${token ? `?token=${encodeURIComponent(token)}` : ''}`;
     } else if (agentKey === 'voice') {
-      window.open(`https://talk.taxai.ae/${token ? `?token=${encodeURIComponent(token)}` : ''}`, '_blank');
+      window.location.href = `http://localhost:3001/${token ? `?token=${encodeURIComponent(token)}` : ''}`;
     }
   };
 

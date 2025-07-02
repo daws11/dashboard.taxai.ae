@@ -7,6 +7,8 @@ import bcrypt from "bcryptjs";
 import type { Session } from "next-auth";
 import type { JWT } from "next-auth/jwt";
 import type { SessionStrategy } from "next-auth";
+// @ts-expect-error: If type error, ensure @types/jsonwebtoken is installed
+import jwt from "jsonwebtoken";
 
 export const authOptions = {
   adapter: MongoDBAdapter(clientPromise),
@@ -42,13 +44,21 @@ export const authOptions = {
         (session.user as Record<string, unknown>).id = token.sub;
         ((session as unknown) as Record<string, unknown>).accessToken = token.accessToken;
         (session.user as Record<string, unknown>).email = token.email;
+        if ((token as Record<string, unknown>).ssoJwt) {
+          ((session as unknown) as Record<string, unknown>).ssoJwt = (token as Record<string, unknown>).ssoJwt;
+        }
       }
       return session;
     },
-    async jwt({ token, user }: { token: JWT; user?: unknown }) {
+    async jwt({ token, user }: { token: JWT; user?: Record<string, unknown> }) {
       if (user && typeof user === 'object' && user !== null && 'email' in user) {
         token.accessToken = token.sub;
-        token.email = (user as { email: string }).email;
+        token.email = user.email as string;
+        const payload = {
+          id: (user.id || token.sub) as string,
+          email: user.email as string,
+        };
+        token.ssoJwt = jwt.sign(payload, process.env.NEXTAUTH_SECRET!, { expiresIn: '1h' });
       }
       return token;
     },
