@@ -38,9 +38,9 @@ export function AgentSelector() {
       token = (session as Record<string, unknown>).ssoJwt as string;
     }
     if (agentKey === 'chat') {
-      window.location.href = `https://ask.taxai.ae/${token ? `?token=${encodeURIComponent(token)}` : ''}`;
+      window.location.href = `https://talk.taxai.ae/${token ? `?token=${encodeURIComponent(token)}` : ''}`;
     } else if (agentKey === 'voice') {
-      window.location.href = `http://localhost:3001/${token ? `?token=${encodeURIComponent(token)}` : ''}`;
+      window.location.href = `https://talk.taxai.ae/${token ? `?token=${encodeURIComponent(token)}` : ''}`;
     }
   };
 
