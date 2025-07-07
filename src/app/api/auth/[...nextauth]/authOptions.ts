@@ -35,7 +35,7 @@ export const authOptions = {
       },
     }),
   ],
-  session: { strategy: "jwt" as SessionStrategy },
+  session: { strategy: "jwt" as SessionStrategy, maxAge: 60 * 60 * 24 },
   pages: {
     signIn: "/", // redirect to login page
   },
@@ -70,7 +70,7 @@ export const authOptions = {
           id: (user.id || token.sub) as string,
           email: user.email as string,
         };
-        token.ssoJwt = jwt.sign(payload, process.env.NEXTAUTH_SECRET!, { expiresIn: '1h' });
+        token.ssoJwt = jwt.sign(payload, process.env.NEXTAUTH_SECRET!, { expiresIn: '24h' });
       }
       return token;
     },

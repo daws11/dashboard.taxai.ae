@@ -40,7 +40,8 @@ export function AgentSelector() {
     if (agentKey === 'chat') {
       window.location.href = `https://ask.taxai.ae/${token ? `?token=${encodeURIComponent(token)}` : ''}`;
     } else if (agentKey === 'voice') {
-      window.location.href = `https://talk.taxai.ae/${token ? `?token=${encodeURIComponent(token)}` : ''}`;
+      // window.location.href = `http://localhost:3001/${token ? `?token=${encodeURIComponent(token)}` : ''}`;
+      window.location.href = `talk.taxai.ae/${token ? `?token=${encodeURIComponent(token)}` : ''}`;
     }
   };
 
