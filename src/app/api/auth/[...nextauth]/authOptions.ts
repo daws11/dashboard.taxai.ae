@@ -39,6 +39,18 @@ export const authOptions = {
   pages: {
     signIn: "/", // redirect to login page
   },
+  cookies: {
+    sessionToken: {
+      name: 'next-auth.session-token',
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: true,
+        domain: process.env.COOKIE_DOMAIN || '.taxai.ae',
+      },
+    },
+  },
   callbacks: {
     async session({ session, token }: { session: Session; token: JWT }) {
       if (token && session.user) {
