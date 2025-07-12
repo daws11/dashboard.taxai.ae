@@ -5,7 +5,7 @@ import SubscriptionInfo from "@/components/Account/SubscriptionInfo";
 import AccountHistory from "@/components/Account/AccountHistory";
 import PlanDialog from "@/components/Account/PlanDialog";
 import { Card } from "@/components/ui/card";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signIn, getSession } from "next-auth/react";
 import { TABS, JOB_TITLES, LANGUAGES, plans } from "./accountConstants";
 import { normalizeLanguage } from "./accountUtils";
@@ -35,7 +35,13 @@ const mockUser = {
 };
 
 export default function AccountManagement() {
-  const [tab, setTab] = useState("Profile");
+  const searchParams = useSearchParams();
+  const initialTab = (() => {
+    const tabParam = searchParams?.get("tab");
+    if (tabParam && TABS.includes(tabParam)) return tabParam;
+    return "Profile";
+  })();
+  const [tab, setTab] = useState(initialTab);
   const [email, setEmail] = useState(mockUser.email);
   const [password, setPassword] = useState("");
   const [jobTitle, setJobTitle] = useState(mockUser.jobTitle);
@@ -68,6 +74,14 @@ export default function AccountManagement() {
     }
     fetchUser();
   }, []);
+
+  // Sync tab state if URL changes (e.g. user navigates back/forward)
+  useEffect(() => {
+    const tabParam = searchParams?.get("tab");
+    if (tabParam && TABS.includes(tabParam) && tabParam !== tab) {
+      setTab(tabParam);
+    }
+  }, [searchParams, tab]);
 
   async function handleUpdate(e: React.FormEvent) {
     e.preventDefault();

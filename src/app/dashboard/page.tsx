@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 type Payment = {
   amount: number;
@@ -51,6 +53,11 @@ export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Cek apakah trial sudah habis (perlu state agar tidak pakai hook di bawah early return)
+  const [trialExpired, setTrialExpired] = useState(false);
+  // State untuk dialog
+  const [openDialog, setOpenDialog] = useState(false);
+
   useEffect(() => {
     async function fetchUser() {
       if (session?.user?.email) {
@@ -64,6 +71,20 @@ export default function DashboardPage() {
     }
     fetchUser();
   }, [session]);
+
+  useEffect(() => {
+    if (user && user.subscription?.type === 'trial') {
+      const created = new Date(user.createdAt);
+      const now = new Date();
+      const trialEnd = new Date(created.getTime() + 14 * 24 * 60 * 60 * 1000);
+      const expired = now > trialEnd;
+      setTrialExpired(expired);
+      setOpenDialog(expired);
+    } else {
+      setTrialExpired(false);
+      setOpenDialog(false);
+    }
+  }, [user]);
 
   if (status === "loading" || loading) {
     return (
@@ -117,6 +138,39 @@ export default function DashboardPage() {
         <ThemeToggle />
       </div>
       <div className="max-w-4xl mx-auto space-y-8">
+        {/* Dialog peringatan trial habis */}
+        <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+          <DialogContent className="max-w-md w-full text-center">
+            <DialogHeader>
+              <div className="flex flex-col items-center gap-2">
+                <div className="bg-red-100 dark:bg-red-900 rounded-full p-3 mb-2 flex items-center justify-center">
+                  <svg width="40" height="40" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="text-red-600 dark:text-red-300"><circle cx="12" cy="12" r="10" /><path d="M12 8v4" /><circle cx="12" cy="16" r="1" /></svg>
+                </div>
+                <DialogTitle className="text-2xl font-bold text-red-700 dark:text-red-300">Trial Period Expired</DialogTitle>
+                <DialogDescription className="text-base text-gray-700 dark:text-gray-200 mt-2">
+                  Your 14-day trial period has ended. To continue using AI Agent Services, please upgrade your plan.
+                </DialogDescription>
+              </div>
+            </DialogHeader>
+            <div className="mt-6 flex flex-col gap-2">
+              <button
+                className="w-full px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow transition-all text-lg"
+                onClick={() => { setOpenDialog(false); window.location.href = '/dashboard/account?tab=Subscription'; }}
+              >
+                Upgrade Plan
+              </button>
+            </div>
+          </DialogContent>
+        </Dialog>
+        {/* Alert peringatan trial habis */}
+        {trialExpired && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertTitle>Trial Expired</AlertTitle>
+            <AlertDescription>
+              Your trial period has ended. You cannot use AI Agent Services until you upgrade your plan.
+            </AlertDescription>
+          </Alert>
+        )}
         <Card className="p-0 overflow-hidden">
           <CardHeader className="flex flex-row items-center gap-6 bg-blue-50 dark:bg-blue-900 p-8 pb-4">
             <div className="flex-1">
@@ -198,7 +252,7 @@ export default function DashboardPage() {
         </Card>
         <section className="bg-white dark:bg-blue-950 rounded-2xl shadow-xl p-8 border border-blue-200 dark:border-blue-800">
           <h2 className="text-lg font-semibold text-blue-900 dark:text-white mb-4 flex items-center gap-2"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="5" rx="2" /><path d="M2 10h20" /></svg> AI Agent Services</h2>
-          <AgentSelector />
+          <AgentSelector disabled={trialExpired} />
         </section>
       </div>
     </main>

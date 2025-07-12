@@ -27,11 +27,12 @@ const AGENTS: AgentOption[] = [
   },
 ];
 
-export function AgentSelector() {
+export function AgentSelector({ disabled = false }: { disabled?: boolean } = {}) {
   const [selected, setSelected] = useState<'voice' | 'chat'>('chat');
   const { data: session } = useSession();
 
   const handleSelect = (agentKey: 'voice' | 'chat') => {
+    if (disabled) return;
     setSelected(agentKey);
     let token: string | undefined = undefined;
     if (session && typeof session === 'object' && 'ssoJwt' in session && typeof (session as Record<string, unknown>).ssoJwt === 'string') {
@@ -40,7 +41,6 @@ export function AgentSelector() {
     if (agentKey === 'chat') {
       window.location.href = `https://ask.taxai.ae/${token ? `?token=${encodeURIComponent(token)}` : ''}`;
     } else if (agentKey === 'voice') {
-      // window.location.href = `http://localhost:3001/${token ? `?token=${encodeURIComponent(token)}` : ''}`;
       window.location.href = `https://talk.taxai.ae/${token ? `?token=${encodeURIComponent(token)}` : ''}`;
     }
   };
@@ -50,7 +50,7 @@ export function AgentSelector() {
       {AGENTS.map(agent => (
         <Card
           key={agent.key}
-          className={`flex-1 p-6 border-2 transition-all ${selected === agent.key ? 'border-blue-600 bg-blue-50 dark:bg-blue-900' : 'border-blue-200 dark:border-blue-700 bg-white dark:bg-blue-950'}`}
+          className={`flex-1 p-6 border-2 transition-all ${selected === agent.key ? 'border-blue-600 bg-blue-50 dark:bg-blue-900' : 'border-blue-200 dark:border-blue-700 bg-white dark:bg-blue-950'} ${disabled ? 'opacity-60 pointer-events-none' : ''}`}
         >
           <div className="flex items-center justify-between mb-2">
             <div className="text-lg font-semibold text-blue-900 dark:text-white">{agent.name}</div>
@@ -61,6 +61,7 @@ export function AgentSelector() {
             variant={selected === agent.key ? 'default' : 'outline'}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-800 dark:hover:bg-blue-900"
             onClick={() => handleSelect(agent.key)}
+            disabled={disabled}
           >
             Select
           </Button>
