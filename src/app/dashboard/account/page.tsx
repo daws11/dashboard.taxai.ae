@@ -139,12 +139,6 @@ export default function AccountManagement() {
     setLoading(false);
   }
 
-  function handlePlanChange() {
-    // TODO: implementasi perubahan plan
-    // setSubscription(...)
-    setPlanDialogOpen(false);
-  }
-
   // Calculate trialExpired for trial plan
   let trialExpired = false;
   if (subscription?.type === 'trial') {
@@ -211,7 +205,6 @@ export default function AccountManagement() {
                   setOpenPlan={setOpenPlan}
                   plans={plans}
                   subscription={subscription}
-                  onPlanChange={handlePlanChange}
                 />
               }
             />
