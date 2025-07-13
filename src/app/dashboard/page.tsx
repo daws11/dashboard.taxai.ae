@@ -182,8 +182,8 @@ export default function DashboardPage() {
                 <Badge variant="outline" className="text-blue-800 dark:text-blue-200 border-blue-300 dark:border-blue-700 bg-blue-100 dark:bg-blue-800">
                   {user.subscription?.type?.charAt(0).toUpperCase() + user.subscription?.type?.slice(1)} Plan
                 </Badge>
-                <Badge variant={user.subscription?.status === 'active' ? 'default' : user.subscription?.status === 'expired' ? 'destructive' : 'secondary'}>
-                  {user.subscription?.status?.charAt(0).toUpperCase() + user.subscription?.status?.slice(1)}
+                <Badge variant={trialExpired || user.subscription?.status === 'expired' ? 'destructive' : user.subscription?.status === 'active' ? 'default' : 'secondary'}>
+                  {(trialExpired ? 'Expired' : user.subscription?.status?.charAt(0).toUpperCase() + user.subscription?.status?.slice(1))}
                 </Badge>
                 <Badge variant="secondary" className="bg-blue-50 text-blue-700 dark:bg-blue-800 dark:text-blue-200">
                   Period: {formatDate(user.subscription?.startDate)} - {formatDate(user.subscription?.endDate)}
@@ -216,6 +216,16 @@ export default function DashboardPage() {
             <div className="flex flex-col md:flex-row gap-4 mt-2">
               <div className="flex-1 bg-blue-50 dark:bg-blue-900 rounded-lg p-4 shadow flex flex-col gap-1">
                 <div className="font-semibold text-blue-900 dark:text-white flex items-center gap-2 mb-1"><svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3" /><circle cx="12" cy="12" r="10" /></svg> Payment Info</div>
+                {trialExpired && (
+                  <div className="mb-2 p-3 rounded bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 flex flex-col md:flex-row items-center gap-3 text-sm">
+                    <span className="flex items-center"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path d="M12 8v4" /><circle cx="12" cy="16" r="1" /></svg></span>
+                    <span className="flex-1 font-semibold">Your trial period has expired. Upgrade your plan to continue using the service.</span>
+                    <button
+                      className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow transition-all text-sm"
+                      onClick={() => window.location.href = '/dashboard/account?tab=Subscription'}
+                    >Upgrade Plan</button>
+                  </div>
+                )}
                 {user.subscription?.type === 'trial' ? (
                   (() => {
                     const created = new Date(user.createdAt);
@@ -223,11 +233,14 @@ export default function DashboardPage() {
                     const trialEnd = new Date(created.getTime() + 14 * 24 * 60 * 60 * 1000);
                     const diffTime = trialEnd.getTime() - now.getTime();
                     const diffDays = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
-                    return (
-                      <div className="font-semibold text-blue-700 dark:text-blue-300">
-                        Trial ends in: <span className="text-blue-600 dark:text-blue-200">{diffDays} day{diffDays !== 1 ? 's' : ''}</span>
-                      </div>
-                    );
+                    if (!trialExpired) {
+                      return (
+                        <div className="font-semibold text-blue-700 dark:text-blue-300">
+                          Trial ends in: <span className="text-blue-600 dark:text-blue-200">{diffDays} day{diffDays !== 1 ? 's' : ''}</span>
+                        </div>
+                      );
+                    }
+                    return null;
                   })()
                 ) : (
                   <>

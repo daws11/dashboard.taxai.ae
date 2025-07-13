@@ -81,7 +81,16 @@ export default function AccountManagement() {
     if (tabParam && TABS.includes(tabParam) && tabParam !== tab) {
       setTab(tabParam);
     }
-  }, [searchParams, tab]);
+    // eslint-disable-next-line
+  }, [searchParams]);
+
+  // Saat user klik tab, update juga URL
+  function handleTabChange(newTab: string) {
+    setTab(newTab);
+    const params = new URLSearchParams(Array.from(searchParams.entries()));
+    params.set("tab", newTab);
+    router.replace(`?${params.toString()}`);
+  }
 
   async function handleUpdate(e: React.FormEvent) {
     e.preventDefault();
@@ -136,6 +145,15 @@ export default function AccountManagement() {
     setPlanDialogOpen(false);
   }
 
+  // Calculate trialExpired for trial plan
+  let trialExpired = false;
+  if (subscription?.type === 'trial') {
+    const created = new Date(createdAt);
+    const now = new Date();
+    const trialEnd = new Date(created.getTime() + 14 * 24 * 60 * 60 * 1000);
+    trialExpired = now > trialEnd;
+  }
+
   return (
     <main className="min-h-screen bg-blue-50 dark:bg-blue-950 py-8 px-4 md:px-12">
       <div className="max-w-3xl mx-auto space-y-8">
@@ -146,7 +164,7 @@ export default function AccountManagement() {
             <button
               key={t}
               className={`px-4 py-2 rounded-t font-medium transition-colors border-b-2 ${tab === t ? 'bg-white dark:bg-blue-900 border-blue-600 text-blue-900 dark:text-white' : 'bg-blue-100 dark:bg-blue-950 border-transparent text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800'}`}
-              onClick={() => setTab(t)}
+              onClick={() => handleTabChange(t)}
             >
               {t}
             </button>
@@ -184,6 +202,7 @@ export default function AccountManagement() {
               subscription={subscription}
               trialUsed={trialUsed}
               createdAt={createdAt}
+              trialExpired={trialExpired}
               PlanDialog={
                 <PlanDialog
                   planDialogOpen={planDialogOpen}

@@ -6,6 +6,7 @@ interface SubscriptionInfoProps {
   trialUsed: boolean;
   createdAt: string;
   PlanDialog: React.ReactNode;
+  trialExpired?: boolean;
 }
 
 function isSubscription(obj: unknown): obj is {
@@ -30,6 +31,7 @@ export default function SubscriptionInfo({
   trialUsed,
   createdAt,
   PlanDialog,
+  trialExpired,
 }: SubscriptionInfoProps) {
   const sub = isSubscription(subscription) ? subscription : {};
   return (
@@ -40,7 +42,7 @@ export default function SubscriptionInfo({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <div className="text-sm">Type: <span className="font-medium">{sub?.type ? sub.type.charAt(0).toUpperCase() + sub.type.slice(1) : '-'}</span></div>
-          <div className="text-sm">Status: <span className={`font-medium ${sub?.status === 'active' ? 'text-green-600' : sub?.status === 'expired' ? 'text-red-600' : 'text-yellow-600'}`}>{sub?.status ? sub.status.charAt(0).toUpperCase() + sub.status.slice(1) : '-'}</span></div>
+          <div className="text-sm">Status: <span className={`font-medium ${trialExpired ? 'text-red-600' : sub?.status === 'active' ? 'text-green-600' : sub?.status === 'expired' ? 'text-red-600' : 'text-yellow-600'}`}>{trialExpired ? 'Expired' : (sub?.status ? sub.status.charAt(0).toUpperCase() + sub.status.slice(1) : '-')}</span></div>
           <div className="text-sm">Message Limit: {sub?.messageLimit ?? '-'}</div>
           <div className="text-sm">Remaining Messages: {sub?.remainingMessages ?? '-'}</div>
           <div className="text-sm">Start Date: {sub?.startDate ? new Date(sub.startDate).toISOString().slice(0, 10) : '-'}</div>
@@ -48,9 +50,19 @@ export default function SubscriptionInfo({
           <div className="text-sm">Trial Used: <span className={trialUsed ? 'text-red-600' : 'text-green-600'}>{trialUsed ? 'Yes' : 'No'}</span></div>
           {PlanDialog}
         </div>
-        <div className="bg-blue-100 dark:bg-blue-900 rounded p-4 space-y-2">
+        <div>
           <div className="font-semibold mb-1 flex items-center gap-2"><span role="img" aria-label="payment">💰</span> Payment Info</div>
-          {sub?.type === 'trial' ? (
+          {trialExpired && (
+            <div className="mb-2 p-3 rounded bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 flex flex-col md:flex-row items-center gap-3 text-sm">
+              <span className="flex items-center"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path d="M12 8v4" /><circle cx="12" cy="16" r="1" /></svg></span>
+              <span className="flex-1 font-semibold">Your trial period has expired. Upgrade your plan to continue using the service.</span>
+              <button
+                className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow transition-all text-sm"
+                onClick={() => window.location.href = '/dashboard/account?tab=Subscription'}
+              >Upgrade Plan</button>
+            </div>
+          )}
+          {sub?.type === 'trial' && !trialExpired ? (
             (() => {
               const created = new Date(createdAt);
               const now = new Date();
@@ -63,14 +75,14 @@ export default function SubscriptionInfo({
                 </div>
               );
             })()
-          ) : (
+          ) : sub?.type !== 'trial' ? (
             <>
               <div className="text-sm">Amount: <span className="font-medium">{sub?.payment?.amount ? `$${sub.payment.amount}` : '-'}</span></div>
               <div className="text-sm">Method: {sub?.payment?.method ?? '-'}</div>
               <div className="text-sm">Last Payment: {sub?.payment?.lastPaymentDate ? new Date(sub.payment.lastPaymentDate).toISOString().slice(0, 10) : '-'}</div>
               <div className="text-sm">Next Payment: {sub?.payment?.nextPaymentDate ? new Date(sub.payment.nextPaymentDate).toISOString().slice(0, 10) : '-'}</div>
             </>
-          )}
+          ) : null}
         </div>
       </div>
     </Card>

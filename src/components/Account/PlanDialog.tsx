@@ -2,6 +2,8 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, Dialog
 import * as Accordion from "@radix-ui/react-accordion";
 import { motion } from "framer-motion";
 import React from "react";
+import { loadStripe } from '@stripe/stripe-js';
+import { useState } from 'react';
 
 // Tambahkan tipe Plan dan Subscription
 type Plan = {
@@ -16,6 +18,7 @@ type Plan = {
 
 type Subscription = {
   type?: string;
+  email?: string;
 } & Record<string, unknown>;
 
 interface PlanDialogProps {
@@ -25,7 +28,7 @@ interface PlanDialogProps {
   setOpenPlan: (v: string) => void;
   plans: Plan[];
   subscription: Subscription;
-  onPlanChange: (planKey: string) => void;
+  // onPlanChange: (planKey: string) => void; // Hapus karena tidak dipakai
 }
 
 export default function PlanDialog({
@@ -35,8 +38,36 @@ export default function PlanDialog({
   setOpenPlan,
   plans,
   subscription,
-  onPlanChange,
 }: PlanDialogProps) {
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+
+  // Stripe publishable key dari env
+  const stripePromise = typeof window !== 'undefined' ? loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!) : null;
+
+  const handleStripeCheckout = async (planKey: string) => {
+    setLoadingPlan(planKey);
+    try {
+      const res = await fetch('/api/stripe/checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ planKey, email: subscription?.email }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to create Stripe session');
+      const stripe = await stripePromise;
+      if (stripe) {
+        await stripe.redirectToCheckout({ sessionId: data.sessionId });
+      } else {
+        alert('Stripe failed to load');
+      }
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to start checkout';
+      alert(errorMessage);
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
+
   return (
     <Dialog open={planDialogOpen} onOpenChange={setPlanDialogOpen}>
       <DialogTrigger asChild>
@@ -79,7 +110,13 @@ export default function PlanDialog({
                   ) : plan.contact ? (
                     <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold" onClick={() => window.location.href = 'mailto:sales@taxai.ae'}>Contact Sales</button>
                   ) : (
-                    <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold" onClick={() => onPlanChange(plan.key)}>Change</button>
+                    <button
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold disabled:opacity-60"
+                      onClick={() => handleStripeCheckout(plan.key)}
+                      disabled={loadingPlan === plan.key}
+                    >
+                      {loadingPlan === plan.key ? 'Processing...' : 'Change'}
+                    </button>
                   )}
                 </motion.div>
               </Accordion.Content>
