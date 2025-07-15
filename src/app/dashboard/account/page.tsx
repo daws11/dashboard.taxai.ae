@@ -66,7 +66,8 @@ export default function AccountManagement() {
         setEmail(user.email || "");
         setJobTitle(user.jobTitle || "");
         setLanguage(normalizeLanguage(user.language || ""));
-        setSubscription(user.subscription || {});
+        // Gabungkan email ke subscription
+        setSubscription({ ...user.subscription, email: user.email });
         setTrialUsed(user.trialUsed || false);
         setCreatedAt(user.createdAt ? new Date(user.createdAt).toISOString().slice(0, 10) : "");
         setUpdatedAt(user.updatedAt ? new Date(user.updatedAt).toISOString().slice(0, 10) : "");

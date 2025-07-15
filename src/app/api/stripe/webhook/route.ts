@@ -38,6 +38,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Plan or email not found' }, { status: 400 });
     }
     await db;
+    // Ambil user lama untuk akumulasi sisa token
+    const existingUser = await User.findOne({ email });
+    const oldRemaining = existingUser?.subscription?.remainingMessages || 0;
+    const newLimit = getMessageLimit(plan.key);
+    const newRemaining = oldRemaining + newLimit;
     await User.findOneAndUpdate(
       { email },
       {
@@ -45,8 +50,9 @@ export async function POST(req: NextRequest) {
           subscription: {
             type: plan.key,
             status: 'active',
-            messageLimit: getMessageLimit(plan.key),
-            remainingMessages: getMessageLimit(plan.key),
+            messageLimit: newLimit,
+            remainingMessages: newRemaining,
+            callSeconds: 180, // 3 menit call untuk semua paket
             startDate: new Date(),
             endDate: getEndDate(plan.key),
             payment: {
@@ -55,7 +61,8 @@ export async function POST(req: NextRequest) {
               lastPaymentDate: new Date(),
               nextPaymentDate: getEndDate(plan.key),
             }
-          }
+          },
+          trialUsed: false // set trialUsed menjadi false saat upgrade
         }
       }
     );
