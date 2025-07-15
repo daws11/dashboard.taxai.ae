@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { plans } from "@/app/dashboard/account/accountConstants";
 
 type Payment = {
   amount: number;
@@ -26,6 +27,7 @@ type Subscription = {
   startDate: string;
   endDate: string;
   payment: Payment;
+  callSeconds?: number; // Added for call time
 };
 
 type User = {
@@ -127,6 +129,17 @@ export default function DashboardPage() {
   }
 
   const percent = Math.round((user.subscription?.remainingMessages / user.subscription?.messageLimit) * 100);
+  const planName = plans.find((p: { key: string; name: string }) => p.key === user.subscription?.type)?.name || 'Unknown Plan';
+
+  // Call time progress bar logic
+  const maxCallSeconds = 180;
+  const callSeconds = typeof user.subscription?.callSeconds === 'number' ? user.subscription.callSeconds : 0;
+  const callPercent = Math.round((callSeconds / maxCallSeconds) * 100);
+  function formatSeconds(secs: number) {
+    const m = Math.floor(secs / 60).toString().padStart(2, '0');
+    const s = Math.floor(secs % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  }
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 dark:from-blue-950 dark:via-blue-900 dark:to-blue-950 py-8 px-4 md:px-12">
@@ -212,6 +225,20 @@ export default function DashboardPage() {
                 {user.subscription?.remainingMessages} / {user.subscription?.messageLimit} ({percent}%)
               </span>
             </div>
+            {/* Call time progress bar */}
+            <div className="flex flex-wrap gap-2 items-center mt-4">
+              <span className="text-sm font-semibold text-blue-700 dark:text-blue-300 flex items-center gap-1"><svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg> Call Time Left:</span>
+              <span className="text-sm font-mono text-blue-700 dark:text-blue-200">{formatSeconds(callSeconds)} / 03:00 ({callPercent}%)</span>
+            </div>
+            <div className="w-full bg-blue-100 dark:bg-blue-900 rounded-full h-5 flex items-center relative shadow-inner mt-2">
+              <div
+                className="h-5 rounded-full bg-blue-400 dark:bg-blue-500 transition-all"
+                style={{ width: `${callPercent}%` }}
+              />
+              <span className="absolute left-1/2 -translate-x-1/2 text-xs font-semibold text-blue-900 dark:text-blue-100">
+                {formatSeconds(callSeconds)} / 03:00 ({callPercent}%)
+              </span>
+            </div>
             <Separator className="my-4" />
             <div className="flex flex-col md:flex-row gap-4 mt-2">
               <div className="flex-1 bg-blue-50 dark:bg-blue-900 rounded-lg p-4 shadow flex flex-col gap-1">
@@ -265,7 +292,7 @@ export default function DashboardPage() {
         </Card>
         <section className="bg-white dark:bg-blue-950 rounded-2xl shadow-xl p-8 border border-blue-200 dark:border-blue-800">
           <h2 className="text-lg font-semibold text-blue-900 dark:text-white mb-4 flex items-center gap-2"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="5" rx="2" /><path d="M2 10h20" /></svg> AI Agent Services</h2>
-          <AgentSelector disabled={trialExpired} />
+          <AgentSelector disabled={trialExpired} planName={planName} />
         </section>
       </div>
     </main>

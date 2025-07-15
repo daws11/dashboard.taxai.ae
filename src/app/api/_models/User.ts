@@ -12,6 +12,7 @@ const SubscriptionSchema = new mongoose.Schema({
   status: { type: String, enum: ['active', 'expired', 'pending'] },
   messageLimit: Number,
   remainingMessages: Number,
+  callSeconds: Number,
   startDate: Date,
   endDate: Date,
   payment: PaymentSchema,

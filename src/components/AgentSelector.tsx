@@ -15,19 +15,19 @@ interface AgentOption {
 const AGENTS: AgentOption[] = [
   {
     key: 'voice',
-    name: 'Voice Agent',
-    description: 'Voice-based AI service for conversational interaction.',
+    name: 'Yosr Voice Agent',
+    description: 'Your intelligent AI tax consultant, offering instant, expert advice and seamless filing support right through a natural voice conversation.',
     active: false,
   },
   {
     key: 'chat',
-    name: 'Chat Agent',
-    description: 'Chat-based AI service for text communication.',
+    name: 'Atto Chat Agent',
+    description: 'Your AI-powered tax consultant, offering instant, chat-based guidance to intelligently optimize your finances for maximum savings and effortless compliance.',
     active: true,
   },
 ];
 
-export function AgentSelector({ disabled = false }: { disabled?: boolean } = {}) {
+export function AgentSelector({ disabled = false, planName = 'Unknown Plan' }: { disabled?: boolean; planName?: string } = {}) {
   const [selected, setSelected] = useState<'voice' | 'chat'>('chat');
   const { data: session } = useSession();
 
@@ -54,7 +54,12 @@ export function AgentSelector({ disabled = false }: { disabled?: boolean } = {})
         >
           <div className="flex items-center justify-between mb-2">
             <div className="text-lg font-semibold text-blue-900 dark:text-white">{agent.name}</div>
-            <span className={`text-xs px-2 py-1 rounded ${agent.active ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-500'}`}>{agent.active ? 'Active' : 'Inactive'}</span>
+            {/* Custom label logic */}
+            {agent.key === 'chat' ? (
+              <span className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700">{planName}</span>
+            ) : agent.key === 'voice' ? (
+              <span className="text-xs px-2 py-1 rounded bg-yellow-100 text-yellow-700">Free 3-Minutes Call</span>
+            ) : null}
           </div>
           <div className="text-sm text-blue-700 dark:text-blue-200 mb-4">{agent.description}</div>
           <Button
