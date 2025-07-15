@@ -7,6 +7,10 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 export async function POST(req: NextRequest) {
   try {
     const { planKey, email } = await req.json();
+    // Validasi email
+    if (!email) {
+      return NextResponse.json({ error: 'Email is required' }, { status: 400 });
+    }
     // Cari plan dari accountConstants
     const plan = plans.find(p => p.key === planKey);
     if (!plan || !plan.price || plan.contact || plan.price === 'Free') {

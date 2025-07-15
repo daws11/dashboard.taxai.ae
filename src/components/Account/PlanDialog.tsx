@@ -45,6 +45,11 @@ export default function PlanDialog({
   const stripePromise = typeof window !== 'undefined' ? loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!) : null;
 
   const handleStripeCheckout = async (planKey: string) => {
+    if (!subscription?.email) {
+      alert("Email tidak ditemukan. Silakan login ulang.");
+      setLoadingPlan(null);
+      return;
+    }
     setLoadingPlan(planKey);
     try {
       const res = await fetch('/api/stripe/checkout-session', {

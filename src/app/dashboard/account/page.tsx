@@ -204,7 +204,7 @@ export default function AccountManagement() {
                   openPlan={openPlan}
                   setOpenPlan={setOpenPlan}
                   plans={plans}
-                  subscription={subscription}
+                  subscription={{ ...subscription, email }} // pastikan email selalu ada
                 />
               }
             />
