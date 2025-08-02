@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
+import { useTranslation } from "@/lib/hooks/useTranslation";
 
 function Logo() {
   return (
@@ -23,16 +24,8 @@ function Logo() {
   );
 }
 
-const navLinks = [
-  { href: "/dashboard", label: "Dashboard", icon: (
-    <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 8h2v-2H7v2zm0-4h2v-2H7v2zm0-4h2V7H7v2zm4 8h8v-2h-8v2zm0-4h8v-2h-8v2zm0-6v2h8V7h-8z" /></svg>
-  ) },
-  { href: "/dashboard/account", label: "Account Management", icon: (
-    <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" /><path d="M6 20v-2a4 4 0 0 1 4-4h0a4 4 0 0 1 4 4v2" /></svg>
-  ) },
-];
-
 export default function DashboardLayout({ children }: { children: ReactNode }) {
+  const { t } = useTranslation();
   const pathname = typeof window !== "undefined" ? window.location.pathname : "";
   const [open, setOpen] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
@@ -40,6 +33,15 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const { data: session, status } = useSession();
   const Loading = dynamic(() => import('@/app/loading'), { ssr: false });
+
+  const navLinks = [
+    { href: "/dashboard", label: t('sidebar.dashboard'), icon: (
+      <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 8h2v-2H7v2zm0-4h2v-2H7v2zm0-4h2V7H7v2zm4 8h8v-2h-8v2zm0-4h8v-2h-8v2zm0-6v2h8V7h-8z" /></svg>
+    ) },
+    { href: "/dashboard/account", label: t('sidebar.accountManagement'), icon: (
+      <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" /><path d="M6 20v-2a4 4 0 0 1 4-4h0a4 4 0 0 1 4 4v2" /></svg>
+    ) },
+  ];
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -63,7 +65,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   };
 
   if (status === "loading") {
-    return <div className="min-h-screen flex items-center justify-center text-blue-900 dark:text-white">Loading...</div>;
+    return <div className="min-h-screen flex items-center justify-center text-blue-900 dark:text-white">{t('common.loading')}</div>;
   }
 
   if (isLoggingOut) {
@@ -78,7 +80,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <Button variant="outline" size="icon" className="border-blue-300 dark:border-blue-700">
-                <span className="sr-only">Open sidebar</span>
+                <span className="sr-only">{t('sidebar.openSidebar')}</span>
                 <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
               </Button>
             </SheetTrigger>
@@ -89,7 +91,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                   {user ? navLinks.map(link => (
                     <SidebarLink key={link.href} href={link.href} label={link.label} icon={link.icon} active={isActiveSidebarLink(link.href)} onClick={() => setOpen(false)} tooltip={link.label} />
                   )) : (
-                    <SidebarLink href="/" label="Login" icon={<svg width='20' height='20' fill='none' stroke='currentColor' strokeWidth='2' viewBox='0 0 24 24'><path d='M15 12H3m0 0l4-4m-4 4l4 4m13-8v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h6' /></svg>} active={pathname === "/"} tooltip="Login" />
+                    <SidebarLink href="/" label={t('common.login')} icon={<svg width='20' height='20' fill='none' stroke='currentColor' strokeWidth='2' viewBox='0 0 24 24'><path d='M15 12H3m0 0l4-4m-4 4l4 4m13-8v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h6' /></svg>} active={pathname === "/"} tooltip={t('common.login')} />
                   )}
                 </nav>
                 {user && <>
@@ -132,7 +134,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             {user ? navLinks.map(link => (
               <SidebarLink key={link.href} href={link.href} label={link.label} icon={link.icon} active={isActiveSidebarLink(link.href)} tooltip={link.label} />
             )) : (
-              <SidebarLink href="/" label="Login" icon={<svg width='20' height='20' fill='none' stroke='currentColor' strokeWidth='2' viewBox='0 0 24 24'><path d='M15 12H3m0 0l4-4m-4 4l4 4m13-8v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h6' /></svg>} active={pathname === "/"} tooltip="Login" />
+              <SidebarLink href="/" label={t('common.login')} icon={<svg width='20' height='20' fill='none' stroke='currentColor' strokeWidth='2' viewBox='0 0 24 24'><path d='M15 12H3m0 0l4-4m-4 4l4 4m13-8v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h6' /></svg>} active={pathname === "/"} tooltip={t('common.login')} />
             )}
           </nav>
           {user && <>

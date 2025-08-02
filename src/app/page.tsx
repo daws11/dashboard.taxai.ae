@@ -5,9 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { signIn, useSession } from "next-auth/react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { useTranslation } from "@/lib/hooks/useTranslation";
 import Image from 'next/image';
 
 export default function LoginPage() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -34,14 +37,15 @@ export default function LoginPage() {
     if (res?.ok) {
       router.replace("/dashboard");
     } else {
-      setError("Invalid email or password.");
+      setError(t('auth.invalidCredentials'));
     }
   };
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-blue-50 dark:bg-blue-950 px-2 sm:px-4">
       <div className="relative w-full max-w-md sm:max-w-md md:max-w-lg mx-auto">
-        <div className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10">
+        <div className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 flex gap-2 layout-preserve">
+          <LanguageSwitcher />
           <ThemeToggle />
         </div>
         <form
@@ -55,31 +59,31 @@ export default function LoginPage() {
           </div>
           {/* <h1 className="text-2xl font-bold text-blue-900 dark:text-white text-center">Login to Your Account</h1> */}
           <div>
-            <label htmlFor="email" className="block text-blue-900 dark:text-blue-200 mb-1 text-sm sm:text-base">Email</label>
+            <label htmlFor="email" className="block text-blue-900 dark:text-blue-200 mb-1 text-sm sm:text-base">{t('auth.email')}</label>
             <Input
               id="email"
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
-              placeholder="Enter your email"
+              placeholder={t('auth.enterEmail')}
               className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-700 text-blue-900 dark:text-white text-sm sm:text-base"
               required
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-blue-900 dark:text-blue-200 mb-1 text-sm sm:text-base">Password</label>
+            <label htmlFor="password" className="block text-blue-900 dark:text-blue-200 mb-1 text-sm sm:text-base">{t('auth.password')}</label>
             <Input
               id="password"
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
-              placeholder="Enter your password"
+              placeholder={t('auth.enterPassword')}
               className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-700 text-blue-900 dark:text-white text-sm sm:text-base"
               required
             />
           </div>
           <div className="flex justify-between items-center mt-2">
-            <a href="#" className="text-blue-600 hover:underline text-xs sm:text-sm">Forgot password?</a>
+            <a href="#" className="text-blue-600 hover:underline text-xs sm:text-sm">{t('auth.forgotPassword')}</a>
           </div>
           {error && <div className="text-red-600 text-xs sm:text-sm text-center">{error}</div>}
           <Button
@@ -96,14 +100,14 @@ export default function LoginPage() {
                 Loading...
               </span>
             ) : (
-              "Login"
+              t('auth.login')
             )}
           </Button>
-          <div className="mt-6 sm:mt-8 text-center text-xs sm:text-sm text-blue-900 dark:text-blue-200">
-            Login using an account you have previously created.<br />
+          <div className="mt-6 sm:mt-8 text-center text-xs sm:text-sm text-blue-900 dark:text-blue-200 text-rtl">
+            {t('auth.loginDescription')}<br />
             <span>
-              Don&apos;t have an account?{' '}
-              <a href="https://www.taxai.ae/register" className="text-blue-600 hover:underline">Register</a>
+              {t('auth.noAccount')}{' '}
+              <a href="https://www.taxai.ae/register" className="text-blue-600 hover:underline">{t('auth.register')}</a>
             </span>
           </div>
         </form>

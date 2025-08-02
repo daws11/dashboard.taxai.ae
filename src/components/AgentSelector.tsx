@@ -4,6 +4,7 @@ import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import { useSession } from "next-auth/react";
+import { useTranslation } from "@/lib/hooks/useTranslation";
 
 interface AgentOption {
   key: 'voice' | 'chat';
@@ -12,24 +13,25 @@ interface AgentOption {
   active: boolean;
 }
 
-const AGENTS: AgentOption[] = [
-  {
-    key: 'voice',
-    name: 'Yosr Voice Agent',
-    description: 'Your intelligent AI tax consultant, offering instant, expert advice and seamless filing support right through a natural voice conversation.',
-    active: false,
-  },
-  {
-    key: 'chat',
-    name: 'Atto Chat Agent',
-    description: 'Your AI-powered tax consultant, offering instant, chat-based guidance to intelligently optimize your finances for maximum savings and effortless compliance.',
-    active: true,
-  },
-];
-
 export function AgentSelector({ disabled = false, planName = 'Unknown Plan' }: { disabled?: boolean; planName?: string } = {}) {
+  const { t } = useTranslation();
   const [selected, setSelected] = useState<'voice' | 'chat'>('chat');
   const { data: session } = useSession();
+
+  const AGENTS: AgentOption[] = [
+    {
+      key: 'voice',
+      name: t('agents.yosrVoiceAgent'),
+      description: t('agents.voiceAgentDescription'),
+      active: false,
+    },
+    {
+      key: 'chat',
+      name: t('agents.attoChatAgent'),
+      description: t('agents.chatAgentDescription'),
+      active: true,
+    },
+  ];
 
   const handleSelect = (agentKey: 'voice' | 'chat') => {
     if (disabled) return;
@@ -46,11 +48,11 @@ export function AgentSelector({ disabled = false, planName = 'Unknown Plan' }: {
   };
 
   return (
-    <div className="flex flex-col md:flex-row gap-4">
+    <div className="flex flex-col md:flex-row gap-4 layout-preserve">
       {AGENTS.map(agent => (
         <Card
           key={agent.key}
-          className={`flex-1 p-6 border-2 transition-all ${selected === agent.key ? 'border-blue-600 bg-blue-50 dark:bg-blue-900' : 'border-blue-200 dark:border-blue-700 bg-white dark:bg-blue-950'} ${disabled ? 'opacity-60 pointer-events-none' : ''}`}
+          className={`flex-1 p-6 border-2 transition-all ${selected === agent.key ? 'border-blue-600 bg-blue-50 dark:bg-blue-900' : 'border-blue-200 dark:border-blue-700 bg-white dark:bg-blue-950'} ${disabled ? 'opacity-60 pointer-events-none' : ''} layout-preserve`}
         >
           <div className="flex items-center justify-between mb-2">
             <div className="text-lg font-semibold text-blue-900 dark:text-white">{agent.name}</div>
@@ -58,7 +60,7 @@ export function AgentSelector({ disabled = false, planName = 'Unknown Plan' }: {
             {agent.key === 'chat' ? (
               <span className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700">{planName}</span>
             ) : agent.key === 'voice' ? (
-              <span className="text-xs px-2 py-1 rounded bg-yellow-100 text-yellow-700">Free 3-Minutes Call</span>
+              <span className="text-xs px-2 py-1 rounded bg-yellow-100 text-yellow-700">{t('dashboard.free3MinutesCall')}</span>
             ) : null}
           </div>
           <div className="text-sm text-blue-700 dark:text-blue-200 mb-4">{agent.description}</div>
@@ -68,7 +70,7 @@ export function AgentSelector({ disabled = false, planName = 'Unknown Plan' }: {
             onClick={() => handleSelect(agent.key)}
             disabled={disabled}
           >
-            Select
+            {t('common.select')}
           </Button>
         </Card>
       ))}

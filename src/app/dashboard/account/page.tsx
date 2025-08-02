@@ -7,6 +7,7 @@ import PlanDialog from "@/components/Account/PlanDialog";
 import { Card } from "@/components/ui/card";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn, getSession } from "next-auth/react";
+import { useTranslation } from "@/lib/hooks/useTranslation";
 import { TABS, JOB_TITLES, LANGUAGES, plans } from "./accountConstants";
 import { normalizeLanguage } from "./accountUtils";
 
@@ -35,6 +36,7 @@ const mockUser = {
 };
 
 export default function AccountManagement() {
+  const { t } = useTranslation();
   const searchParams = useSearchParams();
   const initialTab = (() => {
     const tabParam = searchParams?.get("tab");
@@ -104,7 +106,7 @@ export default function AccountManagement() {
         body: JSON.stringify({ name, email, password: password || undefined, jobTitle, language: normalizeLanguage(language) }),
       });
       if (res.ok) {
-        setMessage("Profile updated successfully.");
+        setMessage(t('account.profileUpdated'));
         await signIn("credentials", { email, password: password || undefined, redirect: false });
         const session = await getSession();
         if (((session as unknown) as Record<string, unknown>)?.accessToken) {
@@ -114,16 +116,16 @@ export default function AccountManagement() {
         }
       } else {
         const err = await res.text();
-        setMessage("Update failed: " + err);
+        setMessage(t('account.updateFailed') + ": " + err);
       }
     } catch (err) {
-      setMessage("Update failed: " + err);
+      setMessage(t('account.updateFailed') + ": " + err);
     }
     setLoading(false);
   }
 
   async function handleDelete() {
-    if (!confirm("Are you sure you want to delete your account? This action cannot be undone.")) return;
+    if (!confirm(t('account.confirmDeleteAccount'))) return;
     setLoading(true);
     setMessage("");
     try {
@@ -132,10 +134,10 @@ export default function AccountManagement() {
         router.push("/");
       } else {
         const err = await res.text();
-        setMessage("Delete failed: " + err);
+        setMessage(t('account.deleteFailed') + ": " + err);
       }
     } catch (err) {
-      setMessage("Delete failed: " + err);
+      setMessage(t('account.deleteFailed') + ": " + err);
     }
     setLoading(false);
   }
@@ -152,13 +154,13 @@ export default function AccountManagement() {
   return (
     <main className="min-h-screen bg-blue-50 dark:bg-blue-950 py-8 px-4 md:px-12">
       <div className="max-w-3xl mx-auto space-y-8">
-        <h1 className="text-2xl font-bold text-blue-900 dark:text-white mb-4">Account Management</h1>
+        <h1 className="text-2xl font-bold text-blue-900 dark:text-white mb-4 text-rtl">{t('account.accountManagement')}</h1>
         {/* Tabs */}
-        <div className="flex gap-2 mb-4">
+        <div className="flex gap-2 mb-4 layout-preserve">
           {TABS.map((t) => (
             <button
               key={t}
-              className={`px-4 py-2 rounded-t font-medium transition-colors border-b-2 ${tab === t ? 'bg-white dark:bg-blue-900 border-blue-600 text-blue-900 dark:text-white' : 'bg-blue-100 dark:bg-blue-950 border-transparent text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800'}`}
+              className={`px-4 py-2 rounded-t font-medium transition-colors border-b-2 ${tab === t ? 'bg-white dark:bg-blue-900 border-blue-600 text-blue-900 dark:text-white' : 'bg-blue-100 dark:bg-blue-950 border-transparent text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800'} text-rtl`}
               onClick={() => handleTabChange(t)}
             >
               {t}
@@ -168,8 +170,8 @@ export default function AccountManagement() {
         {/* Tab Content */}
         <div>
           {tab === "Profile" && (
-            <Card className="p-8 shadow-xl space-y-6">
-              <h2 className="text-xl font-semibold text-blue-900 dark:text-white flex items-center gap-2 mb-4">
+            <Card className="p-8 shadow-xl space-y-6 layout-preserve">
+              <h2 className="text-xl font-semibold text-blue-900 dark:text-white flex items-center gap-2 mb-4 text-rtl">
                 <span role="img" aria-label="profile">👤</span> Profile Information
               </h2>
               <ProfileForm

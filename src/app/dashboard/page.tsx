@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { AgentSelector } from "@/components/AgentSelector";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { useTranslation } from "@/lib/hooks/useTranslation";
 import { plans } from "@/app/dashboard/account/accountConstants";
 
 type Payment = {
@@ -51,6 +53,7 @@ function formatDate(dateStr: string, withTime = false) {
 }
 
 export default function DashboardPage() {
+  const { t } = useTranslation();
   const { data: session, status } = useSession();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -125,7 +128,7 @@ export default function DashboardPage() {
   }
 
   if (!user) {
-    return <div className="min-h-screen flex items-center justify-center text-red-600">User data not found.</div>;
+    return <div className="min-h-screen flex items-center justify-center text-red-600">{t('dashboard.userDataNotFound')}</div>;
   }
 
   const percent = Math.round((user.subscription?.remainingMessages / user.subscription?.messageLimit) * 100);
@@ -144,11 +147,14 @@ export default function DashboardPage() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 dark:from-blue-950 dark:via-blue-900 dark:to-blue-950 py-8 px-4 md:px-12">
       <div className="flex justify-between items-center mb-6 max-w-4xl mx-auto">
-        <div className="text-xl md:text-2xl font-bold text-blue-900 dark:text-white flex items-center gap-2">
+        <div className="text-xl md:text-2xl font-bold text-blue-900 dark:text-white flex items-center gap-2 text-rtl">
           <span role="img" aria-label="wave">👋</span>
-          Welcome back, <span className="text-blue-700 dark:text-blue-300">{user.name.split(" ")[0]}</span>
+          {t('dashboard.welcome')}, <span className="text-blue-700 dark:text-blue-300">{user.name.split(" ")[0]}</span>
         </div>
-        <ThemeToggle />
+        <div className="flex gap-2 layout-preserve">
+          <LanguageSwitcher />
+          <ThemeToggle />
+        </div>
       </div>
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Dialog peringatan trial habis */}
@@ -159,28 +165,28 @@ export default function DashboardPage() {
                 <div className="bg-red-100 dark:bg-red-900 rounded-full p-3 mb-2 flex items-center justify-center">
                   <svg width="40" height="40" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="text-red-600 dark:text-red-300"><circle cx="12" cy="12" r="10" /><path d="M12 8v4" /><circle cx="12" cy="16" r="1" /></svg>
                 </div>
-                <DialogTitle className="text-2xl font-bold text-red-700 dark:text-red-300">Trial Period Expired</DialogTitle>
-                <DialogDescription className="text-base text-gray-700 dark:text-gray-200 mt-2">
-                  Your 14-day trial period has ended. To continue using AI Agent Services, please upgrade your plan.
+                <DialogTitle className="text-2xl font-bold text-red-700 dark:text-red-300 text-rtl">{t('dashboard.trialExpired')}</DialogTitle>
+                <DialogDescription className="text-base text-gray-700 dark:text-gray-200 mt-2 text-rtl">
+                  {t('dashboard.trialExpiredDescription')}
                 </DialogDescription>
               </div>
             </DialogHeader>
             <div className="mt-6 flex flex-col gap-2">
-              <button
-                className="w-full px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow transition-all text-lg"
-                onClick={() => { setOpenDialog(false); window.location.href = '/dashboard/account?tab=Subscription'; }}
-              >
-                Upgrade Plan
-              </button>
+                              <button
+                  className="w-full px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow transition-all text-lg"
+                  onClick={() => { setOpenDialog(false); window.location.href = '/dashboard/account?tab=Subscription'; }}
+                >
+                  {t('dashboard.upgradePlan')}
+                </button>
             </div>
           </DialogContent>
         </Dialog>
         {/* Alert peringatan trial habis */}
         {trialExpired && (
           <Alert variant="destructive" className="mb-4">
-            <AlertTitle>Trial Expired</AlertTitle>
-            <AlertDescription>
-              Your trial period has ended. You cannot use AI Agent Services until you upgrade your plan.
+            <AlertTitle className="text-rtl">{t('dashboard.trialExpiredAlert')}</AlertTitle>
+            <AlertDescription className="text-rtl">
+              {t('dashboard.trialExpiredAlertDescription')}
             </AlertDescription>
           </Alert>
         )}
@@ -189,17 +195,17 @@ export default function DashboardPage() {
             <div className="flex-1">
               <CardTitle className="text-2xl font-bold text-blue-900 dark:text-white mb-1 flex flex-wrap gap-2 items-center">
                 {user.name}
-                {user.trialUsed && <Badge variant="destructive">Trial Used</Badge>}
+                {user.trialUsed && <Badge variant="destructive">{t('dashboard.trialUsed')}</Badge>}
               </CardTitle>
               <div className="flex flex-wrap gap-2 items-center mb-1">
                 <Badge variant="outline" className="text-blue-800 dark:text-blue-200 border-blue-300 dark:border-blue-700 bg-blue-100 dark:bg-blue-800">
                   {user.subscription?.type?.charAt(0).toUpperCase() + user.subscription?.type?.slice(1)} Plan
                 </Badge>
                 <Badge variant={trialExpired || user.subscription?.status === 'expired' ? 'destructive' : user.subscription?.status === 'active' ? 'default' : 'secondary'}>
-                  {(trialExpired ? 'Expired' : user.subscription?.status?.charAt(0).toUpperCase() + user.subscription?.status?.slice(1))}
+                  {(trialExpired ? t('dashboard.expired') : user.subscription?.status?.charAt(0).toUpperCase() + user.subscription?.status?.slice(1))}
                 </Badge>
                 <Badge variant="secondary" className="bg-blue-50 text-blue-700 dark:bg-blue-800 dark:text-blue-200">
-                  Period: {formatDate(user.subscription?.startDate)} - {formatDate(user.subscription?.endDate)}
+                  {t('dashboard.period')}: {formatDate(user.subscription?.startDate)} - {formatDate(user.subscription?.endDate)}
                 </Badge>
               </div>
               <div className="text-blue-700 dark:text-blue-200 text-sm flex items-center gap-2">
@@ -213,7 +219,7 @@ export default function DashboardPage() {
           <CardContent className="pt-0 pb-8 px-8">
             <Separator className="my-4" />
             <div className="flex flex-wrap gap-2 items-center mt-2">
-              <span className="text-sm font-semibold text-blue-900 dark:text-white flex items-center gap-1"><svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="5" rx="2" /><path d="M2 10h20" /></svg> Messages Left:</span>
+              <span className="text-sm font-semibold text-blue-900 dark:text-white flex items-center gap-1"><svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="5" rx="2" /><path d="M2 10h20" /></svg> {t('dashboard.messagesLeft')}</span>
               <span className="text-sm font-mono text-blue-700 dark:text-blue-200">{user.subscription?.remainingMessages} / {user.subscription?.messageLimit} ({percent}%)</span>
             </div>
             <div className="w-full bg-blue-100 dark:bg-blue-900 rounded-full h-5 flex items-center relative shadow-inner mt-2">
@@ -227,7 +233,7 @@ export default function DashboardPage() {
             </div>
             {/* Call time progress bar */}
             <div className="flex flex-wrap gap-2 items-center mt-4">
-              <span className="text-sm font-semibold text-blue-700 dark:text-blue-300 flex items-center gap-1"><svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg> Call Time Left:</span>
+              <span className="text-sm font-semibold text-blue-700 dark:text-blue-300 flex items-center gap-1"><svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg> {t('dashboard.callTimeLeft')}</span>
               <span className="text-sm font-mono text-blue-700 dark:text-blue-200">{formatSeconds(callSeconds)} / 03:00 ({callPercent}%)</span>
             </div>
             <div className="w-full bg-blue-100 dark:bg-blue-900 rounded-full h-5 flex items-center relative shadow-inner mt-2">
@@ -240,17 +246,17 @@ export default function DashboardPage() {
               </span>
             </div>
             <Separator className="my-4" />
-            <div className="flex flex-col md:flex-row gap-4 mt-2">
-              <div className="flex-1 bg-blue-50 dark:bg-blue-900 rounded-lg p-4 shadow flex flex-col gap-1">
-                <div className="font-semibold text-blue-900 dark:text-white flex items-center gap-2 mb-1"><svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3" /><circle cx="12" cy="12" r="10" /></svg> Payment Info</div>
+            <div className="flex flex-col md:flex-row gap-4 mt-2 layout-preserve">
+              <div className="flex-1 bg-blue-50 dark:bg-blue-900 rounded-lg p-4 shadow flex flex-col gap-1 layout-preserve">
+                <div className="font-semibold text-blue-900 dark:text-white flex items-center gap-2 mb-1"><svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3" /><circle cx="12" cy="12" r="10" /></svg> {t('dashboard.paymentInfo')}</div>
                 {trialExpired && (
                   <div className="mb-2 p-3 rounded bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 flex flex-col md:flex-row items-center gap-3 text-sm">
                     <span className="flex items-center"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path d="M12 8v4" /><circle cx="12" cy="16" r="1" /></svg></span>
-                    <span className="flex-1 font-semibold">Your trial period has expired. Upgrade your plan to continue using the service.</span>
+                    <span className="flex-1 font-semibold">{t('dashboard.trialExpiredMessage')}</span>
                     <button
                       className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow transition-all text-sm"
                       onClick={() => window.location.href = '/dashboard/account?tab=Subscription'}
-                    >Upgrade Plan</button>
+                    >{t('dashboard.upgradePlan')}</button>
                   </div>
                 )}
                 {user.subscription?.type === 'trial' ? (
@@ -263,7 +269,7 @@ export default function DashboardPage() {
                     if (!trialExpired) {
                       return (
                         <div className="font-semibold text-blue-700 dark:text-blue-300">
-                          Trial ends in: <span className="text-blue-600 dark:text-blue-200">{diffDays} day{diffDays !== 1 ? 's' : ''}</span>
+                          {t('dashboard.trialEndsIn')}: <span className="text-blue-600 dark:text-blue-200">{diffDays} {t('dashboard.days', { count: diffDays })}</span>
                         </div>
                       );
                     }
@@ -271,27 +277,27 @@ export default function DashboardPage() {
                   })()
                 ) : (
                   <>
-                    <div className="text-sm">Amount: <span className="font-medium">${user.subscription?.payment?.amount}</span></div>
-                    <div className="text-sm">Method: {user.subscription?.payment?.method}</div>
-                    <div className="text-sm">Last Payment: {formatDate(user.subscription?.payment?.lastPaymentDate, true)}</div>
-                    <div className="text-sm">Next Payment: {formatDate(user.subscription?.payment?.nextPaymentDate, true)}</div>
+                    <div className="text-sm">{t('dashboard.amount')}: <span className="font-medium">${user.subscription?.payment?.amount}</span></div>
+                    <div className="text-sm">{t('dashboard.method')}: {user.subscription?.payment?.method}</div>
+                    <div className="text-sm">{t('dashboard.lastPayment')}: {formatDate(user.subscription?.payment?.lastPaymentDate, true)}</div>
+                    <div className="text-sm">{t('dashboard.nextPayment')}: {formatDate(user.subscription?.payment?.nextPaymentDate, true)}</div>
                   </>
                 )}
               </div>
-              <div className="flex-1 bg-blue-50 dark:bg-blue-900 rounded-lg p-4 shadow flex flex-col gap-1">
-                <div className="font-semibold text-blue-900 dark:text-white flex items-center gap-2 mb-1"><svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3" /><circle cx="12" cy="12" r="10" /></svg> Account Info</div>
-                <div className="text-sm">Trial Used: <span className={user.trialUsed ? 'text-red-600' : 'text-green-600'}>{user.trialUsed ? 'Yes' : 'No'}</span></div>
-                <div className="text-sm">Created: {formatDate(user.createdAt, true)}</div>
-                <div className="text-sm">Updated: {formatDate(user.updatedAt, true)}</div>
+              <div className="flex-1 bg-blue-50 dark:bg-blue-900 rounded-lg p-4 shadow flex flex-col gap-1 layout-preserve">
+                <div className="font-semibold text-blue-900 dark:text-white flex items-center gap-2 mb-1"><svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3" /><circle cx="12" cy="12" r="10" /></svg> {t('dashboard.accountInfo')}</div>
+                <div className="text-sm">{t('dashboard.trialUsed')}: <span className={user.trialUsed ? 'text-red-600' : 'text-green-600'}>{user.trialUsed ? t('common.yes') : t('common.no')}</span></div>
+                <div className="text-sm">{t('dashboard.created')}: {formatDate(user.createdAt, true)}</div>
+                <div className="text-sm">{t('dashboard.updated')}: {formatDate(user.updatedAt, true)}</div>
               </div>
             </div>
             <Button className="mt-6 bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-800 dark:hover:bg-blue-900 transition-all shadow-lg" onClick={() => window.location.href = "/dashboard/account"}>
-              <span className="flex items-center gap-2"><svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" /></svg> Manage Account</span>
+              <span className="flex items-center gap-2"><svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" /></svg> {t('dashboard.manageAccount')}</span>
             </Button>
           </CardContent>
         </Card>
         <section className="bg-white dark:bg-blue-950 rounded-2xl shadow-xl p-8 border border-blue-200 dark:border-blue-800">
-          <h2 className="text-lg font-semibold text-blue-900 dark:text-white mb-4 flex items-center gap-2"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="5" rx="2" /><path d="M2 10h20" /></svg> AI Agent Services</h2>
+          <h2 className="text-lg font-semibold text-blue-900 dark:text-white mb-4 flex items-center gap-2 text-rtl"><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="5" rx="2" /><path d="M2 10h20" /></svg> {t('dashboard.aiAgentServices')}</h2>
           <AgentSelector disabled={trialExpired} planName={planName} />
         </section>
       </div>

@@ -135,3 +135,109 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* RTL Support for Arabic - More selective approach */
+[dir="rtl"] {
+  direction: rtl;
+}
+
+/* Only reverse text alignment for specific elements */
+[dir="rtl"] .text-left {
+  text-align: right;
+}
+
+[dir="rtl"] .text-right {
+  text-align: left;
+}
+
+/* Keep layout structure intact but adjust text direction */
+[dir="rtl"] .rtl-text {
+  direction: rtl;
+}
+
+/* Preserve flex layouts */
+[dir="rtl"] .flex {
+  flex-direction: row;
+}
+
+[dir="rtl"] .flex-col {
+  flex-direction: column;
+}
+
+/* Only reverse specific components that need it */
+[dir="rtl"] .rtl-reverse {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .rtl-reverse-col {
+  flex-direction: column-reverse;
+}
+
+/* Preserve margins and paddings */
+[dir="rtl"] .ml-auto {
+  margin-left: auto;
+}
+
+[dir="rtl"] .mr-auto {
+  margin-right: auto;
+}
+
+[dir="rtl"] .pl-4 {
+  padding-left: 1rem;
+}
+
+[dir="rtl"] .pr-4 {
+  padding-right: 1rem;
+}
+
+[dir="rtl"] .border-l {
+  border-left: 1px solid;
+}
+
+[dir="rtl"] .border-r {
+  border-right: 1px solid;
+}
+
+/* RTL Layout specific styles */
+.rtl-layout {
+  direction: rtl;
+}
+
+/* Preserve specific layout components */
+.rtl-layout .layout-preserve {
+  direction: ltr;
+}
+
+/* Only reverse text direction for content, not layout */
+.rtl-layout .content-rtl {
+  direction: rtl;
+}
+
+/* Keep buttons and form elements in original direction */
+.rtl-layout button,
+.rtl-layout input,
+.rtl-layout select,
+.rtl-layout textarea {
+  direction: ltr;
+}
+
+/* Keep icons and symbols in original direction */
+.rtl-layout .icon,
+.rtl-layout .symbol {
+  direction: ltr;
+}
+
+/* Preserve flex layouts */
+.rtl-layout .flex {
+  flex-direction: row;
+}
+
+.rtl-layout .flex-col {
+  flex-direction: column;
+}
+
+/* Only reverse specific text elements */
+.rtl-layout .text-rtl {
+  direction: rtl;
+  text-align: right;
+}
