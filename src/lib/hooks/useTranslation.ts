@@ -12,7 +12,7 @@ export function useTranslation() {
   }, []);
 
   // Return a safe translation function that works on both server and client
-  const t = (key: string, options?: any): string => {
+  const t = (key: string, options?: Record<string, unknown>): string => {
     if (!isClient) {
       // On server side, return the key as fallback
       return key;
