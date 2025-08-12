@@ -15,6 +15,5 @@ const clientPromise = global._mongoClientPromise;
 export default clientPromise;
 
 declare global {
-  // eslint-disable-next-line no-var
   var _mongoClientPromise: Promise<MongoClient> | undefined;
 } 

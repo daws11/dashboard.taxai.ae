@@ -28,16 +28,36 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
     setLoading(true);
-    const res = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
-    setLoading(false);
-    if (res?.ok) {
-      router.replace("/dashboard");
-    } else {
-      setError(t('auth.invalidCredentials'));
+    
+    try {
+      console.log('Attempting login with:', { email, password: '***' });
+      
+      const res = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+      
+      console.log('SignIn response:', res);
+      
+      if (res?.ok) {
+        console.log('Login successful, redirecting to dashboard');
+        router.replace("/dashboard");
+      } else {
+        console.error('Login failed:', res?.error);
+        if (res?.error === 'CredentialsSignin') {
+          setError(t('auth.invalidCredentials'));
+        } else if (res?.error === 'Configuration') {
+          setError('Authentication service configuration error. Please contact support.');
+        } else {
+          setError(`Login failed: ${res?.error || 'Unknown error'}`);
+        }
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      setError('Network error. Please check your connection and try again.');
+    } finally {
+      setLoading(false);
     }
   };
 

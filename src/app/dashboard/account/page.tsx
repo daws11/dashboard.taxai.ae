@@ -61,18 +61,60 @@ export default function AccountManagement() {
 
   useEffect(() => {
     async function fetchUser() {
-      const res = await fetch("/api/users/me");
-      if (res.ok) {
-        const user = await res.json();
-        setName(user.name || "");
-        setEmail(user.email || "");
-        setJobTitle(user.jobTitle || "");
-        setLanguage(normalizeLanguage(user.language || ""));
-        // Gabungkan email ke subscription
-        setSubscription({ ...user.subscription, email: user.email });
-        setTrialUsed(user.trialUsed || false);
-        setCreatedAt(user.createdAt ? new Date(user.createdAt).toISOString().slice(0, 10) : "");
-        setUpdatedAt(user.updatedAt ? new Date(user.updatedAt).toISOString().slice(0, 10) : "");
+      try {
+        // Try to get user data from backend first
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_API_URL || 'https://tax-ai-backend-dm7p.onrender.com';
+        const res = await fetch(`${backendUrl}/api/users/me`, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (res.ok) {
+          const user = await res.json();
+          setName(user.name || "");
+          setEmail(user.email || "");
+          setJobTitle(user.jobTitle || "");
+          setLanguage(normalizeLanguage(user.language || ""));
+          setSubscription({ ...user.subscription, email: user.email });
+          setTrialUsed(user.trialUsed || false);
+          setCreatedAt(user.createdAt ? new Date(user.createdAt).toISOString().slice(0, 10) : "");
+          setUpdatedAt(user.updatedAt ? new Date(user.updatedAt).toISOString().slice(0, 10) : "");
+        } else {
+          // Fallback to local API if backend fails
+          console.warn('Backend API failed, falling back to local API');
+          const localRes = await fetch("/api/users/me");
+          if (localRes.ok) {
+            const user = await localRes.json();
+            setName(user.name || "");
+            setEmail(user.email || "");
+            setJobTitle(user.jobTitle || "");
+            setLanguage(normalizeLanguage(user.language || ""));
+            setSubscription({ ...user.subscription, email: user.email });
+            setTrialUsed(user.trialUsed || false);
+            setCreatedAt(user.createdAt ? new Date(user.createdAt).toISOString().slice(0, 10) : "");
+            setUpdatedAt(user.updatedAt ? new Date(user.updatedAt).toISOString().slice(0, 10) : "");
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        // Fallback to local API on error
+        try {
+          const localRes = await fetch("/api/users/me");
+          if (localRes.ok) {
+            const user = await localRes.json();
+            setName(user.name || "");
+            setEmail(user.email || "");
+            setJobTitle(user.jobTitle || "");
+            setLanguage(normalizeLanguage(user.language || ""));
+            setSubscription({ ...user.subscription, email: user.email });
+            setTrialUsed(user.trialUsed || false);
+            setCreatedAt(user.createdAt ? new Date(user.createdAt).toISOString().slice(0, 10) : "");
+            setUpdatedAt(user.updatedAt ? new Date(user.updatedAt).toISOString().slice(0, 10) : "");
+          }
+        } catch (localError) {
+          console.error('Local API also failed:', localError);
+        }
       }
     }
     fetchUser();
@@ -100,13 +142,17 @@ export default function AccountManagement() {
     setLoading(true);
     setMessage("");
     try {
-      const res = await fetch("/api/users/me", {
+      // Try to update user data in backend first
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_API_URL || 'https://tax-ai-backend-dm7p.onrender.com';
+      const res = await fetch(`${backendUrl}/api/users/me`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password: password || undefined, jobTitle, language: normalizeLanguage(language) }),
       });
+      
       if (res.ok) {
         setMessage(t('account.profileUpdated'));
+        // Refresh session with new credentials
         await signIn("credentials", { email, password: password || undefined, redirect: false });
         const session = await getSession();
         if (((session as unknown) as Record<string, unknown>)?.accessToken) {
@@ -115,10 +161,30 @@ export default function AccountManagement() {
           localStorage.setItem("accessTokenExpiry", expiry.toString());
         }
       } else {
-        const err = await res.text();
-        setMessage(t('account.updateFailed') + ": " + err);
+        // Fallback to local API if backend fails
+        console.warn('Backend API failed, falling back to local API');
+        const localRes = await fetch("/api/users/me", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email, password: password || undefined, jobTitle, language: normalizeLanguage(language) }),
+        });
+        
+        if (localRes.ok) {
+          setMessage(t('account.profileUpdated'));
+          await signIn("credentials", { email, password: password || undefined, redirect: false });
+          const session = await getSession();
+          if (((session as unknown) as Record<string, unknown>)?.accessToken) {
+            const expiry = Date.now() + 60 * 60 * 1000; // 1 jam
+            localStorage.setItem("accessToken", ((session as unknown) as Record<string, string>).accessToken as string);
+            localStorage.setItem("accessTokenExpiry", expiry.toString());
+          }
+        } else {
+          const err = await localRes.text();
+          setMessage(t('account.updateFailed') + ": " + err);
+        }
       }
     } catch (err) {
+      console.error('Update error:', err);
       setMessage(t('account.updateFailed') + ": " + err);
     }
     setLoading(false);
