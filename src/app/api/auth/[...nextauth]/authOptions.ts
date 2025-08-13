@@ -15,6 +15,7 @@ export const authOptions = {
   adapter: MongoDBAdapter(clientPromise),
   providers: [
     CredentialsProvider({
+      id: "credentials",
       name: "Credentials",
       credentials: {
         email: { label: "Email", type: "email" },
@@ -23,9 +24,16 @@ export const authOptions = {
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
         
+        console.log('🔐 NextAuth authorize called with:', { email: credentials.email, password: '***' });
+        
         try {
           // Call custom backend API for authentication
-          const response = await fetch(`${process.env.BACKEND_API_URL}/api/auth/login`, {
+          const backendUrl = process.env.BACKEND_API_URL || 'https://tax-ai-backend-dm7p.onrender.com';
+          
+          console.log('🔐 Attempting backend authentication with:', backendUrl);
+          
+          // Use the correct login endpoint
+          const loginResponse = await fetch(`${backendUrl}/api/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -34,8 +42,31 @@ export const authOptions = {
             }),
           });
 
-          if (response.ok) {
-            const userData = await response.json();
+          console.log('Backend login response status:', loginResponse.status);
+
+          if (loginResponse.ok) {
+            const userData = await loginResponse.json();
+            console.log('✅ Backend authentication successful:', {
+              userId: userData.user._id,
+              email: userData.user.email,
+              name: userData.user.name
+            });
+            
+            // Validate JWT token from backend
+            try {
+              const backendJwtSecret = process.env.JWT_VALIDATION_SECRET || process.env.NEXTAUTH_SECRET;
+              
+              if (!backendJwtSecret) {
+                console.warn('⚠️ JWT validation secret not found, skipping validation');
+              } else {
+                jwt.verify(userData.token, backendJwtSecret);
+                console.log('✅ JWT token validated successfully');
+              }
+            } catch (jwtError) {
+              const errorMessage = jwtError instanceof Error ? jwtError.message : 'Unknown JWT error';
+              console.warn('⚠️ JWT validation failed, but continuing with authentication:', errorMessage);
+            }
+            
             return {
               id: userData.user._id || userData.user.id,
               name: userData.user.name,
@@ -48,37 +79,35 @@ export const authOptions = {
               createdAt: userData.user.createdAt,
               updatedAt: userData.user.updatedAt,
             };
+          } else {
+            const errorText = await loginResponse.text();
+            console.log('❌ Backend authentication failed:', loginResponse.status, errorText);
+            
+            // Return null to indicate authentication failure
+            return null;
           }
           
-          // Fallback to local MongoDB if backend API fails
-          console.warn('Backend API failed, falling back to local authentication');
-          await db;
-          const user = await User.findOne({ email: credentials.email });
-          if (!user) return null;
-          const valid = await bcrypt.compare(credentials.password, user.password);
-          if (!valid) return null;
-          return {
-            id: user._id.toString(),
-            name: user.name,
-            email: user.email,
-            subscription: user.subscription,
-            accessToken: user._id.toString(), // Fallback token
-            jobTitle: user.jobTitle,
-            language: user.language,
-            trialUsed: user.trialUsed,
-            createdAt: user.createdAt,
-            updatedAt: user.updatedAt,
-          };
         } catch (error) {
-          console.error('Login error:', error);
+          console.error('❌ Login error:', error);
           
           // Fallback to local MongoDB authentication
           try {
+            console.log('🔄 Attempting local fallback authentication');
             await db;
             const user = await User.findOne({ email: credentials.email });
-            if (!user) return null;
+            if (!user) {
+              console.log('❌ Local fallback user not found');
+              return null;
+            }
+            
+            console.log('✅ Local fallback user found:', { id: user._id, email: user.email, hasPassword: !!user.password });
+            
             const valid = await bcrypt.compare(credentials.password, user.password);
-            if (!valid) return null;
+            if (!valid) {
+              console.log('❌ Local fallback password validation failed');
+              return null;
+            }
+            console.log('✅ Local fallback authentication successful');
             return {
               id: user._id.toString(),
               name: user.name,
@@ -92,7 +121,7 @@ export const authOptions = {
               updatedAt: user.updatedAt,
             };
           } catch (fallbackError) {
-            console.error('Fallback authentication failed:', fallbackError);
+            console.error('❌ Fallback authentication failed:', fallbackError);
             return null;
           }
         }
@@ -102,6 +131,12 @@ export const authOptions = {
   session: { strategy: "jwt" as SessionStrategy, maxAge: 60 * 60 * 24 },
   pages: {
     signIn: "/", // redirect to login page
+  },
+  debug: process.env.NODE_ENV === 'development',
+  secret: process.env.NEXTAUTH_SECRET,
+  jwt: {
+    // Use the same secret as backend for JWT operations
+    secret: process.env.JWT_VALIDATION_SECRET || process.env.NEXTAUTH_SECRET,
   },
   cookies: {
     sessionToken: {
@@ -185,11 +220,18 @@ export const authOptions = {
           (token as JWT & Record<string, unknown>).updatedAt = userObj.updatedAt;
         }
         
-        const payload = {
-          id: (user.id || token.sub) as string,
-          email: user.email as string,
-        };
-        token.ssoJwt = jwt.sign(payload, process.env.NEXTAUTH_SECRET!, { expiresIn: '24h' });
+        // Generate SSO JWT using the same secret as backend
+        const backendJwtSecret = process.env.JWT_VALIDATION_SECRET || process.env.NEXTAUTH_SECRET;
+        
+        if (backendJwtSecret) {
+          const payload = {
+            id: (user.id || token.sub) as string,
+            email: user.email as string,
+          };
+          token.ssoJwt = jwt.sign(payload, backendJwtSecret, { expiresIn: '24h' });
+        } else {
+          console.warn('⚠️ JWT validation secret not found, skipping SSO JWT generation');
+        }
       }
       return token;
     },
