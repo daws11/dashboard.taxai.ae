@@ -47,13 +47,9 @@ export const authOptions = {
           // Check if email is verified (handle both boolean and undefined cases)
           const isEmailVerified = user.emailVerified === true || user.emailVerified === 'true';
           if (!isEmailVerified) {
-            console.log('❌ Email not verified for user:', user._id, 'Status:', user.emailVerified);
-            // For development/testing, allow unverified emails
-            if (process.env.NODE_ENV === 'development') {
-              console.log('⚠️ Development mode: Allowing unverified email');
-            } else {
-              return null;
-            }
+            console.log('⚠️ Email not verified for user:', user._id, 'Status:', user.emailVerified);
+            // Allow unverified emails in both development and production
+            console.log('✅ Allowing unverified email (production mode)');
           }
           
           // Verify password using bcrypt
@@ -80,15 +76,8 @@ export const authOptions = {
           
           if (!subscriptionActive) {
             console.log('⚠️ Subscription not active for user:', user._id, 'Status:', user.subscription?.status);
-            // For development/testing, allow all subscription statuses
-            if (process.env.NODE_ENV === 'development') {
-              console.log('⚠️ Development mode: Allowing all subscription statuses');
-            } else {
-              // Only block if explicitly inactive/expired
-              if (user.subscription?.status === 'inactive' || user.subscription?.status === 'expired') {
-                return null;
-              }
-            }
+            // Allow all subscription statuses in both development and production
+            console.log('✅ Allowing all subscription statuses (production mode)');
           }
           
           console.log('✅ Local authentication successful for user:', user._id);
