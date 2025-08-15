@@ -27,101 +27,125 @@ export const authOptions = {
         console.log('🔐 NextAuth authorize called with:', { email: credentials.email, password: '***' });
         
         try {
-          // Call custom backend API for authentication
-          const backendUrl = process.env.BACKEND_API_URL || 'https://tax-ai-backend-dm7p.onrender.com';
+          // First, try local MongoDB authentication (direct database access)
+          console.log('🔄 Attempting local MongoDB authentication...');
+          await db;
           
-          console.log('🔐 Attempting backend authentication with:', backendUrl);
-          
-          // Use the correct login endpoint
-          const loginResponse = await fetch(`${backendUrl}/api/auth/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              email: credentials.email,
-              password: credentials.password,
-            }),
-          });
-
-          console.log('Backend login response status:', loginResponse.status);
-
-          if (loginResponse.ok) {
-            const userData = await loginResponse.json();
-            console.log('✅ Backend authentication successful:', {
-              userId: userData.user._id,
-              email: userData.user.email,
-              name: userData.user.name
-            });
-            
-            // Validate JWT token from backend
-            try {
-              const backendJwtSecret = process.env.JWT_VALIDATION_SECRET || process.env.NEXTAUTH_SECRET;
-              
-              if (!backendJwtSecret) {
-                console.warn('⚠️ JWT validation secret not found, skipping validation');
-              } else {
-                jwt.verify(userData.token, backendJwtSecret);
-                console.log('✅ JWT token validated successfully');
-              }
-            } catch (jwtError) {
-              const errorMessage = jwtError instanceof Error ? jwtError.message : 'Unknown JWT error';
-              console.warn('⚠️ JWT validation failed, but continuing with authentication:', errorMessage);
-            }
-            
-            return {
-              id: userData.user._id || userData.user.id,
-              name: userData.user.name,
-              email: userData.user.email,
-              subscription: userData.user.subscription,
-              accessToken: userData.token,
-              jobTitle: userData.user.jobTitle,
-              language: userData.user.language,
-              trialUsed: userData.user.trialUsed,
-              createdAt: userData.user.createdAt,
-              updatedAt: userData.user.updatedAt,
-            };
-          } else {
-            const errorText = await loginResponse.text();
-            console.log('❌ Backend authentication failed:', loginResponse.status, errorText);
-            
-            // Return null to indicate authentication failure
+          const user = await User.findOne({ email: credentials.email });
+          if (!user) {
+            console.log('❌ Local user not found for email:', credentials.email);
             return null;
           }
           
-        } catch (error) {
-          console.error('❌ Login error:', error);
+          console.log('✅ Local user found:', { 
+            id: user._id, 
+            emailVerified: user.emailVerified,
+            subscriptionStatus: user.subscription?.status,
+            hasPassword: !!user.password
+          });
           
-          // Fallback to local MongoDB authentication
+          // Check if email is verified (handle both boolean and undefined cases)
+          const isEmailVerified = user.emailVerified === true || user.emailVerified === 'true';
+          if (!isEmailVerified) {
+            console.log('❌ Email not verified for user:', user._id, 'Status:', user.emailVerified);
+            // For development/testing, allow unverified emails
+            if (process.env.NODE_ENV === 'development') {
+              console.log('⚠️ Development mode: Allowing unverified email');
+            } else {
+              return null;
+            }
+          }
+          
+          // Verify password using bcrypt
+          if (!user.password) {
+            console.log('❌ User has no password hash:', user._id);
+            return null;
+          }
+          
+          const isValidPassword = await bcrypt.compare(credentials.password, user.password);
+          if (!isValidPassword) {
+            console.log('❌ Invalid password for user:', user._id);
+            return null;
+          }
+          
+          console.log('✅ Password validated for user:', user._id);
+          
+          // Check subscription status (allow pending trial subscriptions and be more lenient)
+          const subscriptionActive = user.subscription && (
+            user.subscription.status === 'active' || 
+            user.subscription.status === 'pending' || 
+            user.subscription.type === 'trial' ||
+            !user.subscription.status // Allow users without subscription status
+          );
+          
+          if (!subscriptionActive) {
+            console.log('⚠️ Subscription not active for user:', user._id, 'Status:', user.subscription?.status);
+            // For development/testing, allow all subscription statuses
+            if (process.env.NODE_ENV === 'development') {
+              console.log('⚠️ Development mode: Allowing all subscription statuses');
+            } else {
+              // Only block if explicitly inactive/expired
+              if (user.subscription?.status === 'inactive' || user.subscription?.status === 'expired') {
+                return null;
+              }
+            }
+          }
+          
+          console.log('✅ Local authentication successful for user:', user._id);
+          
+          // Return user data for NextAuth
+          return {
+            id: user._id.toString(),
+            name: user.name || 'Unknown User',
+            email: user.email,
+            subscription: user.subscription,
+            accessToken: user._id.toString(), // Local token
+            jobTitle: user.jobTitle,
+            language: user.language,
+            trialUsed: user.trialUsed,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt,
+          };
+          
+        } catch (error) {
+          console.error('❌ Local authentication failed:', error);
+          
+          // Fallback: try backend authentication if local fails
           try {
-            console.log('🔄 Attempting local fallback authentication');
-            await db;
-            const user = await User.findOne({ email: credentials.email });
-            if (!user) {
-              console.log('❌ Local fallback user not found');
+            console.log('🔄 Attempting backend fallback authentication...');
+            const backendUrl = process.env.BACKEND_API_URL || 'https://tax-ai-backend-dm7p.onrender.com';
+            
+            const loginResponse = await fetch(`${backendUrl}/api/auth/login`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                email: credentials.email,
+                password: credentials.password,
+              }),
+            });
+
+            if (loginResponse.ok) {
+              const userData = await loginResponse.json();
+              console.log('✅ Backend fallback authentication successful');
+              
+              return {
+                id: userData.user._id || userData.user.id,
+                name: userData.user.name,
+                email: userData.user.email,
+                subscription: userData.user.subscription,
+                accessToken: userData.token,
+                jobTitle: userData.user.jobTitle,
+                language: userData.user.language,
+                trialUsed: userData.user.trialUsed,
+                createdAt: userData.user.createdAt,
+                updatedAt: userData.user.updatedAt,
+              };
+            } else {
+              console.log('❌ Backend fallback authentication failed:', loginResponse.status);
               return null;
             }
-            
-            console.log('✅ Local fallback user found:', { id: user._id, email: user.email, hasPassword: !!user.password });
-            
-            const valid = await bcrypt.compare(credentials.password, user.password);
-            if (!valid) {
-              console.log('❌ Local fallback password validation failed');
-              return null;
-            }
-            console.log('✅ Local fallback authentication successful');
-            return {
-              id: user._id.toString(),
-              name: user.name,
-              email: user.email,
-              subscription: user.subscription,
-              accessToken: user._id.toString(), // Fallback token
-              jobTitle: user.jobTitle,
-              language: user.language,
-              trialUsed: user.trialUsed,
-              createdAt: user.createdAt,
-              updatedAt: user.updatedAt,
-            };
           } catch (fallbackError) {
-            console.error('❌ Fallback authentication failed:', fallbackError);
+            console.error('❌ Backend fallback also failed:', fallbackError);
             return null;
           }
         }
