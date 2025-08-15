@@ -80,7 +80,7 @@ export async function GET() {
       console.log('  - emailVerified after update:', updatedUser?.emailVerified);
       
     } catch (updateError) {
-      console.log('❌ Method 1 failed:', updateError.message);
+      console.log('❌ Method 1 failed:', updateError instanceof Error ? updateError.message : 'Unknown error');
       
       try {
         // Method 2: UpdateOne with $set
@@ -100,8 +100,8 @@ export async function GET() {
           console.log('❌ Method 2: No documents modified');
         }
         
-      } catch (updateOneError) {
-        console.log('❌ Method 2 failed:', updateOneError.message);
+             } catch (updateOneError) {
+         console.log('❌ Method 2 failed:', updateOneError instanceof Error ? updateOneError.message : 'Unknown error');
       }
     }
     
@@ -128,7 +128,7 @@ export async function GET() {
         emailVerifiedSchema: User.schema.obj.emailVerified,
         allSchemaFields: Object.keys(User.schema.obj)
       },
-      issues: []
+             issues: [] as string[]
     };
     
     // Identify issues

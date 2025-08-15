@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import db from '../../_utils/db';
 import User from '../../_models/User';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     console.log('🔍 API: Verifying User Data Structure');
     
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
     ];
     
     let allBasicChecksPassed = true;
-    const basicCheckResults = [];
+    const basicCheckResults: Array<{field: string, expected: string | boolean | null | number, actual: string | boolean | null | number, passed: boolean}> = [];
     
     basicChecks.forEach(check => {
       const passed = check.actual === check.expected;
@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
     // Subscription data
     console.log('\n📦 Verifying Subscription Data:');
     let allSubscriptionChecksPassed = true;
-    const subscriptionCheckResults = [];
+    const subscriptionCheckResults: Array<{field: string, expected: string | boolean | null | number, actual: string | boolean | null | number, passed: boolean}> = [];
     
     if (user.subscription) {
       const subscriptionChecks = [
@@ -199,7 +199,7 @@ export async function GET(request: NextRequest) {
           passed: allChecksPassed && passwordValid
         }
       },
-      recommendations: []
+      recommendations: [] as string[]
     };
     
     // Add recommendations

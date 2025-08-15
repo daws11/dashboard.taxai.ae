@@ -110,11 +110,11 @@ export async function POST(request: NextRequest) {
         createdAt: user.createdAt,
         updatedAt: user.updatedAt
       },
-      authentication: {
-        passwordValid: true,
-        canLogin: true,
-        issues: []
-      }
+             authentication: {
+         passwordValid: true,
+         canLogin: true,
+         issues: [] as string[]
+       }
     };
     
     // Check for potential login issues
