@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
+import bcrypt from 'bcryptjs';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -56,4 +57,35 @@ export async function updateBackendUserData(email: string, data: Record<string, 
     headers,
     body: JSON.stringify(data),
   });
+}
+
+// Utility function untuk debug password hashing
+export async function debugPasswordHash(password: string, storedHash: string) {
+  console.log('🔍 Password Debug Info:');
+  console.log('Input password:', password);
+  console.log('Input password length:', password.length);
+  console.log('Stored hash:', storedHash);
+  console.log('Stored hash length:', storedHash.length);
+  
+  // Test bcrypt comparison
+  try {
+    const isValid = await bcrypt.compare(password, storedHash);
+    console.log('Bcrypt comparison result:', isValid);
+    return isValid;
+  } catch (error) {
+    console.error('Bcrypt comparison error:', error);
+    return false;
+  }
+}
+
+// Utility function untuk membuat hash password baru (untuk testing)
+export async function createPasswordHash(password: string) {
+  try {
+    const hash = await bcrypt.hash(password, 10);
+    console.log('New password hash created:', hash);
+    return hash;
+  } catch (error) {
+    console.error('Error creating password hash:', error);
+    return null;
+  }
 }

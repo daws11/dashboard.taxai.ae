@@ -27,7 +27,7 @@ export const authOptions = {
         console.log('🔐 NextAuth authorize called with:', { email: credentials.email, password: '***' });
         
         try {
-          // First, try local MongoDB authentication (direct database access)
+          // Simple local MongoDB authentication
           console.log('🔄 Attempting local MongoDB authentication...');
           await db;
           
@@ -39,56 +39,39 @@ export const authOptions = {
           
           console.log('✅ Local user found:', { 
             id: user._id, 
-            emailVerified: user.emailVerified,
-            subscriptionStatus: user.subscription?.status,
-            hasPassword: !!user.password
+            email: user.email,
+            hasPassword: !!user.password,
+            passwordLength: user.password ? user.password.length : 0
           });
           
-          // Check if email is verified (handle both boolean and undefined cases)
-          const isEmailVerified = user.emailVerified === true || user.emailVerified === 'true';
-          if (!isEmailVerified) {
-            console.log('⚠️ Email not verified for user:', user._id, 'Status:', user.emailVerified);
-            // Allow unverified emails in both development and production
-            console.log('✅ Allowing unverified email (production mode)');
-          }
-          
-          // Verify password using bcrypt
+          // Simple password validation - no additional checks
           if (!user.password) {
-            console.log('❌ User has no password hash:', user._id);
+            console.log('❌ User has no password hash');
             return null;
           }
+          
+          // Debug password comparison
+          console.log('🔍 Comparing passwords...');
+          console.log('Input password length:', credentials.password.length);
+          console.log('Stored hash length:', user.password.length);
           
           const isValidPassword = await bcrypt.compare(credentials.password, user.password);
+          console.log('Password validation result:', isValidPassword);
+          
           if (!isValidPassword) {
-            console.log('❌ Invalid password for user:', user._id);
+            console.log('❌ Password validation failed');
             return null;
           }
           
-          console.log('✅ Password validated for user:', user._id);
+          console.log('✅ Password validated successfully');
           
-          // Check subscription status (allow pending trial subscriptions and be more lenient)
-          const subscriptionActive = user.subscription && (
-            user.subscription.status === 'active' || 
-            user.subscription.status === 'pending' || 
-            user.subscription.type === 'trial' ||
-            !user.subscription.status // Allow users without subscription status
-          );
-          
-          if (!subscriptionActive) {
-            console.log('⚠️ Subscription not active for user:', user._id, 'Status:', user.subscription?.status);
-            // Allow all subscription statuses in both development and production
-            console.log('✅ Allowing all subscription statuses (production mode)');
-          }
-          
-          console.log('✅ Local authentication successful for user:', user._id);
-          
-          // Return user data for NextAuth
+          // Return user data without additional validations
           return {
             id: user._id.toString(),
             name: user.name || 'Unknown User',
             email: user.email,
             subscription: user.subscription,
-            accessToken: user._id.toString(), // Local token
+            accessToken: user._id.toString(),
             jobTitle: user.jobTitle,
             language: user.language,
             trialUsed: user.trialUsed,
@@ -98,45 +81,7 @@ export const authOptions = {
           
         } catch (error) {
           console.error('❌ Local authentication failed:', error);
-          
-          // Fallback: try backend authentication if local fails
-          try {
-            console.log('🔄 Attempting backend fallback authentication...');
-            const backendUrl = process.env.BACKEND_API_URL || 'https://tax-ai-backend-dm7p.onrender.com';
-            
-            const loginResponse = await fetch(`${backendUrl}/api/auth/login`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                email: credentials.email,
-                password: credentials.password,
-              }),
-            });
-
-            if (loginResponse.ok) {
-              const userData = await loginResponse.json();
-              console.log('✅ Backend fallback authentication successful');
-              
-              return {
-                id: userData.user._id || userData.user.id,
-                name: userData.user.name,
-                email: userData.user.email,
-                subscription: userData.user.subscription,
-                accessToken: userData.token,
-                jobTitle: userData.user.jobTitle,
-                language: userData.user.language,
-                trialUsed: userData.user.trialUsed,
-                createdAt: userData.user.createdAt,
-                updatedAt: userData.user.updatedAt,
-              };
-            } else {
-              console.log('❌ Backend fallback authentication failed:', loginResponse.status);
-              return null;
-            }
-          } catch (fallbackError) {
-            console.error('❌ Backend fallback also failed:', fallbackError);
-            return null;
-          }
+          return null;
         }
       },
     }),
@@ -148,8 +93,8 @@ export const authOptions = {
   debug: process.env.NODE_ENV === 'development',
   secret: process.env.NEXTAUTH_SECRET,
   jwt: {
-    // Use the same secret as backend for JWT operations
-    secret: process.env.JWT_VALIDATION_SECRET || process.env.NEXTAUTH_SECRET,
+    // Use NextAuth's own secret for JWT operations
+    secret: process.env.NEXTAUTH_SECRET,
   },
   cookies: {
     sessionToken: {
